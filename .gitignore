@@ -1,0 +1,11 @@
+.env
+*.db
+backend/.venv/
+frontend/node_modules/
+frontend/dist/
+__pycache__/
+*.pyc
+backend/storage/
+frontend/tsconfig.tsbuildinfo
+*.docx
+*.pdf

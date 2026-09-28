@@ -1,0 +1,91 @@
+{
+  "role_name": "Enterprise Sales Manager – Agentic AI Solutions",
+  "role_description": "Owns enterprise B2B pursuit and closure of Agentic AI platform deals, from consultative discovery through commercial negotiation and multi-stakeholder closure.",
+  "paper_title": "Enterprise Sales Manager – Agentic AI Solutions | Assessment Paper",
+  "questions": [
+    {
+      "question_order": 1,
+      "question_type": "OBJECTIVE",
+      "marks": 5,
+      "question_text": "A CIO evaluating an Agentic AI deployment says: \"We already bought a chatbot last year and it delivered nothing.\" Which response best reflects consultative enterprise selling?",
+      "options": [
+        "Explain that our agent architecture is technically superior to the chatbot they purchased.",
+        "Ask what business outcome the chatbot was bought to deliver, how success was measured, and where the process actually broke down.",
+        "Offer an immediate 25% discount to offset their previous failed investment.",
+        "Move the conversation to a different department that has not had a bad experience."
+      ],
+      "correct_option_order": 2
+    },
+    {
+      "question_order": 2,
+      "question_type": "OBJECTIVE",
+      "marks": 5,
+      "question_text": "Which characteristic most clearly distinguishes an agentic AI solution from a traditional rules-based automation or a single-turn LLM assistant in an enterprise workflow?",
+      "options": [
+        "It produces text responses with a larger context window.",
+        "It plans multi-step work, invokes tools or systems, and acts toward a goal with defined autonomy and guardrails.",
+        "It is always deployed on the customer's own GPU hardware.",
+        "It removes the need for any human review or audit trail."
+      ],
+      "correct_option_order": 2
+    },
+    {
+      "question_order": 3,
+      "question_type": "OBJECTIVE",
+      "marks": 5,
+      "question_text": "A $900K Agentic AI deal is forecast to close this quarter. The economic buyer has verbally agreed, but Procurement has not received the paperwork and Security review has not started. What is the most accurate forecast treatment?",
+      "options": [
+        "Keep it as Commit, because the economic buyer already said yes.",
+        "Move it to Best Case / Upside and drive a mutual action plan with dated Security and Procurement milestones.",
+        "Remove it from the forecast entirely until the contract is signed.",
+        "Split the deal into three smaller purchase orders to bypass Procurement thresholds."
+      ],
+      "correct_option_order": 2
+    },
+    {
+      "question_order": 4,
+      "question_type": "OBJECTIVE",
+      "marks": 5,
+      "question_text": "During negotiation, an enterprise customer demands a 30% discount to sign by quarter-end. Which approach best protects both deal value and the customer relationship?",
+      "options": [
+        "Grant the discount immediately to secure the quarter.",
+        "Refuse any movement on price and restate the list price.",
+        "Trade the concession for value: multi-year term, expanded scope, upfront payment, or reference-ability in exchange for a smaller discount.",
+        "Escalate over the buyer's head to their CFO to complain about the request."
+      ],
+      "correct_option_order": 3
+    },
+    {
+      "question_order": 5,
+      "question_type": "SUBJECTIVE",
+      "marks": 20,
+      "question_text": "A global logistics enterprise (12,000 employees) is evaluating an Agentic AI solution to automate exception handling in their freight operations. You have a 45-minute first discovery call with the VP of Operations and a Director of IT. Write the discovery plan you would run: the specific questions you would ask, what you are trying to learn from each, and how you would qualify whether this is a real opportunity.",
+      "instructions": "Write 250-400 words. Structure your answer clearly. Include actual questions you would ask, not just topic headings.",
+      "evaluation_criteria": "Strong answers: (1) open with current-state process and quantified pain (volume of exceptions, cost, cycle time, headcount); (2) probe business impact and a metric the VP is measured on; (3) identify decision process, budget ownership, economic buyer and timeline; (4) surface technical/data realities — source systems, integration, data access, security review; (5) qualify explicitly (compelling event, funding, champion) and state disqualification signals; (6) questions are open-ended and outcome-led rather than feature-led. Deduct for generic scripts, feature pitching, or no qualification criteria."
+    },
+    {
+      "question_order": 6,
+      "question_type": "SUBJECTIVE",
+      "marks": 20,
+      "question_text": "The same logistics customer's Head of Data Security blocks the deal: \"We cannot allow an autonomous agent to take actions inside our TMS, and we are not comfortable with our shipment data leaving our environment.\" The VP of Operations still wants the project. Describe exactly how you would handle this objection and move the deal forward.",
+      "instructions": "Write 250-400 words. Be specific about what you would say, who you would involve, and what you would propose commercially and technically.",
+      "evaluation_criteria": "Strong answers: (1) treat the objection as legitimate and seek to understand the specific risk rather than rebutting; (2) separate the two concerns (autonomy of action vs. data residency) and address each; (3) propose concrete mitigations — human-in-the-loop approval, scoped read-only first phase, least-privilege service accounts, audit logging, private/VPC or in-tenant deployment, DPA, no-training-on-customer-data commitments; (4) bring the right internal resources (solutions architect, security/compliance lead) and offer artefacts (SOC 2, architecture review, pen-test summary); (5) propose a bounded paid pilot or POC with success criteria that de-risks the decision; (6) keep the champion engaged and convert Security into a stakeholder rather than a gatekeeper. Deduct for dismissing the concern, over-promising, or relying only on discounting."
+    },
+    {
+      "question_order": 7,
+      "question_type": "SUBJECTIVE",
+      "marks": 20,
+      "question_text": "Map the stakeholders you would expect in a $1M+ Agentic AI purchase at a large enterprise. For each stakeholder, state what they care about, what could make them block the deal, and the single most effective way to win their support.",
+      "instructions": "Write 250-400 words. Cover at least five distinct stakeholder types.",
+      "evaluation_criteria": "Strong answers identify economic buyer (CFO/COO/CIO — ROI, payback, business case), champion/business owner (outcome, delivery risk), technical evaluator/architect (integration, scalability, model behaviour), security & compliance (data handling, autonomy risk, regulation), procurement/legal (terms, liability, price benchmarking), end users/line managers (job impact, change management, trust in agent decisions), and where relevant an AI governance or risk committee. Credit for naming blocking risk per stakeholder, tailoring value per persona, and an explicit plan to build a multi-threaded relationship rather than single-threading through one contact. Deduct for a flat list with no motivations or no blocking risks."
+    },
+    {
+      "question_order": 8,
+      "question_type": "SUBJECTIVE",
+      "marks": 20,
+      "question_text": "Outline the executive proposal you would submit to close this logistics deal. Describe the sections you would include and what you would put in each — specifically how you would build and defend the ROI case, and how you would structure pricing and the close plan.",
+      "instructions": "Write 250-400 words. Show the structure and the substance, not just headings.",
+      "evaluation_criteria": "Strong answers include: executive summary tied to the customer's own stated metric; current-state problem quantified with the customer's numbers; proposed solution and scope of agent autonomy; phased implementation plan with timeline and responsibilities; ROI model with stated assumptions, baseline, payback period and conservative case; commercial structure (term, licensing/consumption basis, ramp, pilot-to-production conversion); risks and mitigations; success criteria and governance; clear signature/close plan with dated mutual milestones. Credit for using the customer's language and validated data rather than vendor-supplied generic ROI, and for making assumptions explicit and defensible. Deduct for feature-led proposals, unvalidated ROI claims, or no close plan."
+    }
+  ]
+}

@@ -1,0 +1,885 @@
+You are a senior full-stack developer. Build a complete, functional, end-to-end Role-Based Recruitment Assessment Application for our company.
+
+I need a working application, not just a UI prototype. The frontend, backend, database, authentication, assessment generation, candidate submissions, and admin results dashboard must all work together.
+
+The application will be used to conduct recruitment assessments for four different job roles. An admin should be able to enter a candidate's details, select a role, generate a unique assessment link, and share that link with the candidate. The candidate should be able to open the link, answer role-specific objective and subjective questions, and submit the assessment. All submitted data must be permanently stored in the database and accessible to the admin.
+
+Prioritize completing a working MVP that can be developed and tested within approximately one hour. Do not overcomplicate the architecture or add unnecessary integrations.
+
+# 1. Technology Stack
+
+Use the following stack:
+
+Frontend:
+
+* React
+* Vite
+* TypeScript
+* Tailwind CSS
+* React Router
+
+Backend:
+
+* Python FastAPI
+* Pydantic
+* SQLAlchemy with parameterized SQL or SQLAlchemy Core
+
+Database:
+
+* PostgreSQL as the preferred database.
+* SQLite may be supported for quick local development if PostgreSQL is not immediately available.
+
+Authentication:
+
+* Secure admin authentication using hashed passwords.
+* JWT or secure session-based authentication.
+* Environment variables for credentials and secrets.
+
+Use a simple REST API architecture.
+
+Keep the frontend, backend, database schema, and question bank organized in separate folders.
+
+# 2. Application Structure
+
+The application must have two separate interfaces:
+
+A. Admin application:
+
+* Login
+* Dashboard
+* Generate Assessment
+* Candidate Assessments
+* Question Papers
+* Assessment Results
+
+B. Candidate application:
+
+* Unique assessment link
+* Candidate welcome page
+* Role-specific question paper
+* Answer submission
+* Submission confirmation
+
+Candidates must not have access to the admin dashboard or any other candidate's information.
+
+# 3. Admin Login Page
+
+Create a professional login page.
+
+Fields:
+
+* User ID
+* Password
+* Login button
+
+For the initial version, configure a single admin account using environment variables.
+
+Example configuration:
+ADMIN_USER_ID=admin
+ADMIN_PASSWORD_HASH=<secure-password-hash>
+JWT_SECRET=<secure-random-secret>
+
+Do not hardcode the password or JWT secret in frontend code.
+
+Requirements:
+
+* Validate credentials on the backend.
+* Hash and verify passwords securely using a suitable password hashing library.
+* Display a clear error message for invalid credentials.
+* Maintain the authenticated session.
+* Protect all admin pages and admin APIs.
+* Redirect unauthenticated users to the login page.
+* Include a logout button.
+
+After successful login, redirect the admin to the dashboard.
+
+# 4. Four Hiring Roles
+
+The application must contain the following four roles with exactly these names:
+
+Role 1: Enterprise Sales Manager – Agentic AI Solutions
+
+Role 2: AWS Partner Operations & Marketplace Specialist
+
+Role 3: Sales Development Representative (SDR) – Enterprise Sales
+
+Role 4: Account Manager – Enterprise Sales
+
+These names must appear in the admin role-selection dropdown, candidate assessment page, dashboard, results page, and database.
+
+Do not use generic placeholder roles.
+
+Store roles in the database rather than hardcoding them throughout the application. The admin should be able to select a role from a dropdown populated from the database.
+
+Each role must have a separate question paper with its own questions, answer options, correct answers, marks, and evaluation criteria.
+
+# 5. Admin Dashboard
+
+After login, display a professional recruitment assessment dashboard.
+
+Dashboard summary cards:
+
+* Total Assessments Generated
+* Assessments In Progress
+* Assessments Submitted
+* Assessments Pending
+
+Below the summary cards, show a table of all candidates and their assessments.
+
+The dashboard must fetch actual data from the backend database. Do not use hardcoded statistics or mock candidate records.
+
+Provide a sidebar with the following navigation:
+
+1. Dashboard
+2. Generate Assessment
+3. Candidates / Assessments
+4. Question Papers
+5. Logout
+
+Use a clean enterprise-style interface with a responsive layout, readable tables, status badges, and clear buttons.
+
+# 6. Generate Assessment Page
+
+Create a form with the following fields:
+
+Candidate Name – required text input.
+
+Candidate Email – required email input.
+
+Technical Role – required dropdown containing the four exact roles specified above.
+
+Assessment Duration – optional configurable duration in minutes. Provide a sensible default, such as 60 minutes.
+
+Generate Assessment Link – button.
+
+When the admin fills in the candidate details and clicks Generate Assessment Link, the backend must:
+
+1. Validate the candidate's name, email, and selected role.
+2. Identify the active question paper for the selected role.
+3. Create a new assessment record in the database.
+4. Generate a cryptographically secure, random assessment token.
+5. Associate the token with the candidate, selected role, question-paper version, and assessment.
+6. Store a hash of the token in the database rather than storing the raw token.
+7. Generate a unique candidate assessment URL.
+
+Example URL structure:
+
+http://localhost:5173/assessment/<unique-token>
+
+Use the actual configured frontend base URL so that the generated links work in the current environment.
+
+After generation, display a success message and the generated URL directly on the same page.
+
+Include:
+
+* Copy Link button.
+* Candidate name.
+* Candidate email.
+* Selected role.
+* Assessment status.
+* Link creation timestamp.
+
+The Copy Link button must copy the actual generated URL to the clipboard and show a confirmation message.
+
+Each generated assessment must have its own unique token. Multiple candidates applying for the same role must never share an assessment link.
+
+Do not send emails automatically in this version. The admin will copy the link and send it manually through email or another communication channel.
+
+# 7. Role-Specific Question Papers
+
+Create four separate, realistic question papers.
+
+Each paper must contain both objective and subjective questions relevant to the job.
+
+Seed the database with at least 8 questions per role, including:
+
+* 4 objective multiple-choice questions.
+* 4 subjective questions.
+
+This means the initial database should contain at least 32 questions across the four roles.
+
+Use realistic, professionally written questions that assess the candidate's practical skills, business knowledge, reasoning, and job readiness.
+
+Do not simply duplicate the same questions across all four roles.
+
+ROLE 1: Enterprise Sales Manager – Agentic AI Solutions
+
+
+
+ROLE 2: AWS Partner Operations & Marketplace Specialist
+
+
+ROLE 3: Sales Development Representative (SDR) – Enterprise Sales
+
+ROLE 4: Account Manager – Enterprise Sales
+i will give questions later for each role now just build the application 
+
+Question format:
+
+Each objective question must contain:
+
+* Question text.
+* Four answer options.
+* One correct answer.
+* Question order.
+
+Each subjective question must contain:
+
+* Question text.
+* Instructions, if applicable.
+* Question order.
+
+Create original sample questions and answer keys suitable for testing the application. Store the correct answers and evaluation criteria securely on the backend.
+
+The frontend must never receive correct answers or hidden answer keys while a candidate is taking the assessment.
+
+Make question papers configurable and versioned. Allow the admin to manage or update questions through a simple question-paper management page, or a structured seed/configuration file if a full editor would take too long.
+
+# 8. Candidate Assessment Page
+
+When a candidate opens the unique link, validate the token against the database.
+
+The candidate must not be required to create an account or log in.
+
+Display a professional welcome page.
+
+At the top, show:
+
+"Hi, [Candidate Name]!"
+
+Below the greeting, show:
+
+* Candidate name.
+* Assigned role.
+* Assessment instructions.
+* Assessment duration, if configured.
+* Number of questions.
+* Start Assessment button.
+
+Once started, display only the question paper assigned to that candidate.
+
+The candidate must never be able to change the role or access another role's questions by modifying frontend parameters.
+
+Fetch the correct question paper using the validated assessment token on the backend.
+
+Display questions in the exact configured order.
+
+Objective questions:
+
+* Show the question text.
+* Show four selectable options using radio buttons.
+* Allow only one option to be selected.
+* Save the selected option ID.
+
+Subjective questions:
+
+* Show the full question text.
+* Provide a multiline text area.
+* Support detailed written answers and code snippets.
+* Preserve the exact submitted text.
+
+Candidate assessment UI:
+
+* Show question numbers.
+* Show progress, such as Question 3 of 8.
+* Show answered and unanswered question counts.
+* Provide Previous and Next buttons.
+* Provide a question navigation panel.
+* Provide a Submit Assessment button.
+* Show a confirmation dialog before final submission.
+
+Allow candidates to navigate between questions without losing their answers.
+
+# 9. Autosave and Assessment Persistence
+
+No candidate answer should be lost if the browser refreshes, the candidate accidentally closes the tab, or the network temporarily disconnects.
+
+Implement backend autosave for answers.
+
+Whenever a candidate selects an objective option or types a subjective answer, save the answer to the backend with a reasonable debounce for text inputs.
+
+Requirements:
+
+* Save draft answers in the database.
+* Show an autosave status indicator.
+* Preserve answers when the candidate refreshes the page.
+* Load previously saved answers when the same candidate reopens the same valid link.
+* Associate every answer with the correct assessment ID and question ID.
+* Do not rely solely on browser localStorage for persistence.
+* Handle temporary network failures with retry logic where practical.
+
+A candidate must not lose previously saved answers if the browser closes unexpectedly.
+
+# 10. Assessment Submission
+
+When the candidate clicks Submit Assessment:
+
+1. Display a review or confirmation screen.
+2. Show the number of answered and unanswered questions.
+3. Ask the candidate to confirm submission.
+4. Validate required questions on the backend.
+5. Save all final answers in a database transaction.
+6. Record the submission timestamp.
+7. Change the assessment status to Submitted.
+8. Calculate the objective score on the backend.
+9. Mark subjective answers as Pending Evaluation.
+10. Return a successful submission response.
+
+After successful submission, display:
+
+"Your assessment has been submitted successfully. Thank you for your time."
+
+Important rules:
+
+* A completed assessment must not accept further answer changes.
+* Repeated submission requests must not create duplicate submissions.
+* Prevent the candidate from submitting the same assessment multiple times.
+* If the candidate opens the link after submission, show the completed status and confirmation page.
+* Do not delete or overwrite submitted answers.
+* Do not expose correct answers or scores to the candidate after submission unless explicitly configured.
+
+Use backend validation and database transactions to ensure submission consistency.
+
+# 11. Admin Candidate / Assessment Table
+
+Create a dedicated Candidates / Assessments page.
+
+Display all generated assessments from the database.
+
+Use the following columns:
+
+| Column                | Description                                |
+| --------------------- | ------------------------------------------ |
+| Candidate Name        | Candidate's full name                      |
+| Candidate Email       | Candidate's email                          |
+| Technical Role        | Exact selected role                        |
+| Assessment Link       | Copyable assessment URL                    |
+| Created Date          | Assessment creation timestamp              |
+| Status                | Generated, In Progress, Submitted          |
+| Submission Date       | Actual submission timestamp                |
+| Objective Score       | Score obtained in objective questions      |
+| Subjective Evaluation | Pending or Completed                       |
+| Result                | Button to view detailed assessment results |
+
+Provide:
+
+* Search by candidate name or email.
+* Filter by role.
+* Filter by assessment status.
+* Sort by creation date or submission date.
+* Pagination if needed.
+
+Ensure that the dashboard updates after a candidate submits their assessment. Fetch the latest data from the backend.
+
+The admin should be able to identify which candidate received which link and track the link's current status.
+
+# 12. Detailed Assessment Results Page
+
+When the admin clicks Result for a candidate, open a detailed results page.
+
+This is one of the most important parts of the application.
+
+Display the following candidate information:
+
+* Candidate name.
+* Candidate email.
+* Assigned technical role.
+* Assessment ID.
+* Assessment status.
+* Assessment creation timestamp.
+* Assessment start timestamp.
+* Assessment submission timestamp.
+* Question-paper version.
+
+Then display every question in the exact order the candidate received it.
+
+For each question, show:
+
+Question number and question type.
+
+Full original question text.
+
+Maximum marks.
+
+For objective questions:
+
+* All available answer options.
+* The option selected by the candidate.
+* The correct answer.
+* Whether the candidate's answer was correct or incorrect.
+* Marks obtained.
+
+For subjective questions:
+
+* The complete original question.
+* The candidate's complete submitted answer, without truncation.
+* The evaluation criteria.
+* Maximum marks.
+* Marks awarded by the admin.
+* Evaluator feedback.
+* Evaluation status.
+
+The results page must show the actual answers stored in the database. Never display fabricated, placeholder, or generated answers as candidate responses.
+
+Include an evaluation input for each subjective question.
+
+The admin should be able to:
+
+* Enter marks awarded.
+* Add feedback.
+* Save the evaluation.
+* Reopen the result page and see previously saved evaluations.
+
+Validate that awarded marks are between zero and the maximum marks for that question.
+
+Calculate and display:
+
+* Total objective marks obtained.
+* Maximum objective marks.
+* Total subjective marks awarded.
+* Maximum subjective marks.
+* Overall score.
+* Percentage.
+* Evaluation status.
+
+Do not calculate a final percentage as if subjective questions received zero marks while they are still awaiting evaluation.
+
+Until subjective evaluation is complete, show the objective score separately and mark the final score as Pending Evaluation.
+
+Once all subjective answers are evaluated, calculate the final score and percentage.
+
+Do not automatically invent or assign marks for subjective answers. Human evaluation is required in the first version.
+
+# 13. Database Schema – Data Integrity Is Mandatory
+
+Design a normalized relational database with proper foreign keys, unique constraints, indexes, and timestamps.
+
+Create the following tables.
+
+TABLE 1: admin_users
+
+Fields:
+
+* id: Primary key.
+* user_id: Unique admin login ID.
+* password_hash: Secure hashed password.
+* is_active: Boolean.
+* created_at.
+* updated_at.
+
+TABLE 2: roles
+
+Fields:
+
+* id: Primary key.
+* role_name: Unique role name.
+* description.
+* is_active.
+* created_at.
+* updated_at.
+
+Seed this table with the four exact hiring roles.
+
+TABLE 3: question_papers
+
+Fields:
+
+* id: Primary key.
+* role_id: Foreign key referencing roles.
+* paper_title.
+* version.
+* is_active.
+* created_at.
+
+Support multiple versions of question papers for the same role.
+
+A new version must not alter the questions associated with an existing assessment.
+
+TABLE 4: questions
+
+Fields:
+
+* id: Primary key.
+* question_paper_id: Foreign key referencing question_papers.
+* question_text: Full question text.
+* question_type: OBJECTIVE or SUBJECTIVE.
+* marks: Maximum marks.
+* question_order.
+* is_required.
+* evaluation_criteria.
+* created_at.
+
+TABLE 5: question_options
+
+Fields:
+
+* id: Primary key.
+* question_id: Foreign key referencing questions.
+* option_text.
+* option_order.
+* is_correct: Boolean, accessible only to the backend.
+
+Ensure that each objective question has valid answer options and the required correct answer.
+
+TABLE 6: assessments
+
+Fields:
+
+* id: Primary key.
+* candidate_name.
+* candidate_email.
+* role_id: Foreign key referencing roles.
+* question_paper_id: Foreign key referencing question_papers.
+* question_paper_version.
+* unique_token_hash: Unique hashed assessment token.
+* status: GENERATED, IN_PROGRESS, or SUBMITTED.
+* duration_minutes.
+* created_at.
+* started_at.
+* submitted_at.
+* objective_score.
+* subjective_score.
+* final_score.
+* evaluation_status.
+* updated_at.
+
+Use appropriate indexes on role_id, status, candidate_email, and creation date.
+
+TABLE 7: assessment_answers
+
+Fields:
+
+* id: Primary key.
+* assessment_id: Foreign key referencing assessments.
+* question_id: Foreign key referencing questions.
+* selected_option_id: Nullable foreign key referencing question_options.
+* subjective_answer: Nullable text field.
+* created_at.
+* updated_at.
+
+Create a unique constraint on assessment_id and question_id so that only one current answer exists per question in an assessment.
+
+Use this table to autosave candidate drafts and preserve their final submitted responses.
+
+TABLE 8: assessment_evaluations
+
+Fields:
+
+* id: Primary key.
+* assessment_id: Foreign key referencing assessments.
+* question_id: Foreign key referencing questions.
+* awarded_marks.
+* maximum_marks.
+* evaluator_feedback.
+* evaluated_by: Foreign key referencing admin_users.
+* evaluated_at.
+* created_at.
+* updated_at.
+
+Create a unique constraint on assessment_id and question_id.
+
+All evaluation updates must be persisted and reflected in the results dashboard.
+
+Database requirements:
+
+* Use foreign keys and cascading behavior carefully.
+* Prevent orphaned answer and evaluation records.
+* Use database transactions during submission and evaluation.
+* Store timestamps in UTC and display them in the configured local timezone.
+* Never delete submitted assessments or their answers through ordinary admin actions.
+* Preserve historical question-paper versions.
+* Keep objective answer keys out of candidate-facing APIs.
+* Do not store raw assessment tokens or plaintext passwords.
+* Create database indexes for common dashboard queries.
+* Ensure the database schema is initialized automatically when the application is started for the first time.
+
+Use SQLAlchemy models or SQLAlchemy Core with proper transaction handling. Keep database operations organized and avoid unparameterized SQL.
+
+# 14. REST API Endpoints
+
+Implement working FastAPI endpoints for the complete workflow.
+
+Authentication:
+
+POST /api/auth/login
+
+POST /api/auth/logout
+
+GET /api/auth/me
+
+Roles and question papers:
+
+GET /api/roles
+
+GET /api/admin/question-papers
+
+GET /api/admin/question-papers/{paper_id}
+
+POST /api/admin/question-papers
+
+POST /api/admin/questions
+
+Assessment generation:
+
+POST /api/admin/assessments
+
+GET /api/admin/assessments
+
+GET /api/admin/assessments/{assessment_id}
+
+GET /api/admin/assessments/{assessment_id}/results
+
+Candidate assessment:
+
+GET /api/assessments/{token}
+
+POST /api/assessments/{token}/start
+
+GET /api/assessments/{token}/questions
+
+PUT /api/assessments/{token}/answers/{question_id}
+
+POST /api/assessments/{token}/submit
+
+Admin evaluation:
+
+PUT /api/admin/assessments/{assessment_id}/evaluations/{question_id}
+
+POST /api/admin/assessments/{assessment_id}/evaluate
+
+All admin endpoints must require authentication.
+
+Candidate endpoints must validate the secure assessment token, assessment status, and permissions.
+
+Never trust the candidate-provided role ID, question-paper ID, marks, or correct answers. Determine these from the assessment record on the backend.
+
+Implement appropriate HTTP status codes and clear error responses.
+
+# 15. Security and Data Protection
+
+Implement the following security requirements:
+
+* Hash admin passwords securely.
+* Generate high-entropy random assessment tokens.
+* Store only token hashes in the database.
+* Never expose the correct answer key in candidate APIs.
+* Never allow candidates to access other candidate records.
+* Prevent candidate IDs or question IDs from being used to modify another candidate's assessment.
+* Validate all inputs on the backend.
+* Protect admin routes and endpoints.
+* Restrict submitted assessment modification.
+* Prevent duplicate submission.
+* Use environment variables for secrets.
+* Apply basic rate limiting to login and token-sensitive endpoints if practical.
+* Avoid exposing internal database errors or stack traces to users.
+
+The candidate must only access their assessment through their unique token.
+
+# 16. UI Design Requirements
+
+Build a modern, professional enterprise application suitable for recruitment and technical interviews.
+
+Admin design:
+
+* Clean sidebar navigation.
+* Professional dashboard cards.
+* Responsive tables.
+* Search and filter controls.
+* Clear status badges.
+* Properly formatted forms.
+* Copyable assessment links.
+* Readable candidate result pages.
+* Evaluation forms integrated into the results page.
+
+Candidate design:
+
+* Simple, distraction-free assessment interface.
+* Candidate greeting and role at the top.
+* Clear assessment instructions.
+* Question navigation.
+* Progress indicator.
+* Autosave status.
+* Review before submission.
+* Confirmation screen.
+
+Use a consistent color palette, typography, spacing, and reusable components.
+
+Ensure that the application works on desktop and mobile browsers.
+
+# 17. Project Structure
+
+Create a clean project structure similar to:
+
+assessment-app/
+frontend/
+src/
+components/
+pages/
+services/
+layouts/
+types/
+App.tsx
+main.tsx
+package.json
+vite.config.ts
+index.html
+
+```
+backend/
+    app/
+        main.py
+        config.py
+        database.py
+        models.py
+        schemas.py
+        security.py
+        dependencies.py
+        routes/
+            auth.py
+            roles.py
+            question_papers.py
+            assessments.py
+            candidate.py
+            evaluations.py
+        services/
+            assessment_service.py
+            scoring_service.py
+            token_service.py
+        seed.py
+    requirements.txt
+
+.env.example
+README.md
+```
+
+You may adjust the structure if needed, but maintain a clear separation between frontend, backend, database, and business logic.
+
+# 18. Local Setup and Execution
+
+The application must run locally on my Windows machine.
+
+Provide:
+
+* A `.env.example` file.
+* A backend requirements file.
+* A frontend package.json.
+* Database initialization and seed scripts.
+* Instructions for creating a virtual environment.
+* Instructions for installing frontend dependencies.
+* Instructions for starting FastAPI.
+* Instructions for starting Vite.
+* Instructions for opening the application in a browser.
+
+If PostgreSQL is not installed, provide a simple SQLite development fallback or a Docker-based PostgreSQL setup.
+
+The frontend should run on a standard Vite port, and the backend should run on port 8000.
+
+Configure the frontend API base URL through an environment variable.
+
+Make sure the generated assessment links use the correct frontend base URL.
+
+# 19. Testing and Acceptance Criteria
+
+Before declaring the application complete, test the following end-to-end workflow:
+
+TEST 1: Admin login
+
+* Start the application.
+* Log in with the configured admin credentials.
+* Verify that invalid credentials are rejected.
+* Verify that admin pages are protected.
+
+TEST 2: Generate four different assessments
+
+Create one candidate assessment for each of the four roles.
+
+Verify that:
+
+* All four roles appear in the dropdown.
+* Each assessment receives a unique link.
+* Each link is stored in the database.
+* The selected role and question-paper version are correctly associated.
+
+TEST 3: Candidate question paper
+
+Open each generated link in a separate browser session.
+
+Verify that:
+
+* The correct candidate name is displayed.
+* The correct role is displayed.
+* The correct role-specific questions appear.
+* No questions from another role are shown.
+* The correct answer keys are not exposed.
+
+TEST 4: Autosave and submission
+
+* Answer objective questions.
+* Enter detailed subjective answers.
+* Refresh the browser.
+* Verify that answers are restored.
+* Submit the assessment.
+* Verify that the status changes to Submitted.
+* Verify that a second submission is rejected.
+
+TEST 5: Admin results
+
+Return to the admin dashboard.
+
+Verify that:
+
+* The candidate's status is updated.
+* The submission timestamp is shown.
+* The objective score is calculated correctly.
+* The results page displays every original question and actual candidate answer.
+* The selected objective option is displayed correctly.
+* Subjective answers are displayed completely.
+* The admin can evaluate subjective answers.
+* The final score updates after evaluation.
+
+TEST 6: Persistence
+
+Stop and restart the backend.
+
+Verify that all candidates, links, questions, answers, submission timestamps, and evaluations remain available in the database.
+
+Do not mark these tests as passed unless they have actually been run.
+
+# 20. Development Instructions – Important
+
+Work directly in the current project directory.
+
+First inspect the existing files and repository before creating or modifying anything. If the directory already contains an application, reuse the existing structure where possible.
+
+Do not unnecessarily overwrite or delete unrelated files.
+
+Build the application in the following order:
+
+1. Database schema, migrations or initialization, and seed data.
+2. Backend authentication and assessment APIs.
+3. Frontend admin login and dashboard.
+4. Assessment generation and unique link display.
+5. Candidate assessment page with role-specific questions and autosave.
+6. Submission handling and objective scoring.
+7. Admin results and subjective evaluation.
+8. Run the application and verify the complete workflow.
+
+Prioritize functional correctness and data integrity over decorative features.
+
+Do not stop after generating the project structure or writing a plan. Actually create the source files, install dependencies where possible, run the application, and fix errors.
+
+Do not leave placeholder buttons, mock API responses, or fake database records in the final application.
+
+If time is limited, complete the core working workflow first and then add optional UI enhancements.
+
+At the end, provide:
+
+* A summary of the files created.
+* Exact PowerShell commands to run the application.
+* The local admin login configuration.
+* The URL to open the admin application.
+* How to generate and test a candidate assessment.
+* Any features that remain incomplete.
+
+Begin implementing the application now.
+the db service id is dpg-dat17kp7lnhs73b8btj0-a and it is in render

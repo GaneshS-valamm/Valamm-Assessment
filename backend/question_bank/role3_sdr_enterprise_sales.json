@@ -1,0 +1,91 @@
+{
+  "role_name": "Sales Development Representative (SDR) – Enterprise Sales",
+  "role_description": "Researches and qualifies enterprise prospects, runs multi-channel outbound, books qualified discovery meetings and maintains CRM hygiene.",
+  "paper_title": "Sales Development Representative (SDR) – Enterprise Sales | Assessment Paper",
+  "questions": [
+    {
+      "question_order": 1,
+      "question_type": "OBJECTIVE",
+      "marks": 5,
+      "question_text": "Which of the following is the strongest definition of an Ideal Customer Profile (ICP) for enterprise outbound?",
+      "options": [
+        "Any company large enough to afford the product.",
+        "A firmographic and behavioural description of accounts that get the most value and close fastest — industry, size, tech stack, business trigger and buying-team shape.",
+        "The job titles the SDR finds easiest to reach on LinkedIn.",
+        "The list of accounts the marketing team has already run ads against."
+      ],
+      "correct_option_order": 2
+    },
+    {
+      "question_order": 2,
+      "question_type": "OBJECTIVE",
+      "marks": 5,
+      "question_text": "A prospect replies to a cold email: \"Interesting, but we're heads-down until next quarter.\" What is the most effective SDR response?",
+      "options": [
+        "Mark the lead as closed-lost and move on.",
+        "Acknowledge the timing, ask one question about what changes next quarter, and propose a short call now to be ready — with a specific dated fallback if they prefer to wait.",
+        "Send the same pitch again the following morning.",
+        "Reply asking them to forward you to whoever is not busy."
+      ],
+      "correct_option_order": 2
+    },
+    {
+      "question_order": 3,
+      "question_type": "OBJECTIVE",
+      "marks": 5,
+      "question_text": "In a qualification framework such as MEDDIC, what does identifying the \"Economic Buyer\" specifically require?",
+      "options": [
+        "Finding the most senior person listed on the company website.",
+        "Confirming who holds discretionary budget authority to approve this purchase and how they make that decision.",
+        "Confirming the name of the procurement software the company uses.",
+        "Identifying which competitor the prospect currently pays."
+      ],
+      "correct_option_order": 2
+    },
+    {
+      "question_order": 4,
+      "question_type": "OBJECTIVE",
+      "marks": 5,
+      "question_text": "Which CRM practice most directly protects enterprise pipeline quality in an SDR team?",
+      "options": [
+        "Logging every activity and next step against the correct account and contact, with accurate disposition and a dated next action.",
+        "Creating a new lead record for each email sent to maximise activity counts.",
+        "Leaving notes in a personal spreadsheet so the CRM stays uncluttered.",
+        "Marking all engaged prospects as Qualified so Account Executives see more pipeline."
+      ],
+      "correct_option_order": 1
+    },
+    {
+      "question_order": 5,
+      "question_type": "SUBJECTIVE",
+      "marks": 20,
+      "question_text": "You are given a territory of 300 enterprise accounts (2,000+ employees, financial services and insurance) and asked to build a prioritised target list of 40 accounts for this quarter. Describe your research method: what signals you would look for, what sources you would use, and how you would rank the accounts.",
+      "instructions": "Write 250-400 words. Be concrete about signals and sources, and explain your ranking logic.",
+      "evaluation_criteria": "Strong answers define ICP fit criteria plus intent/trigger signals: recent funding or M&A, leadership hires in relevant functions, job postings revealing tooling or initiatives, earnings-call and annual-report priorities, regulatory pressure, tech-stack evidence, existing customer lookalikes, product usage or web/content engagement, past closed-lost revisits. Sources: LinkedIn/Sales Navigator, company filings and investor material, job boards, news, review sites, CRM history, intent data, internal customer references. Ranking should combine fit + trigger + accessibility (warm paths, existing champions who changed jobs) into a tiered A/B/C model with a stated weighting and a plan for how many contacts per account to multi-thread. Deduct for list-buying only, no signals, or no prioritisation logic."
+    },
+    {
+      "question_order": 6,
+      "question_type": "SUBJECTIVE",
+      "marks": 20,
+      "question_text": "Write an actual cold email to a VP of Customer Operations at a large insurance company, plus the LinkedIn message you would send the same person. Then explain the reasoning behind your choices.",
+      "instructions": "Write the real copy (subject line and body), keep the email under 150 words, then add a short rationale. Total 250-400 words.",
+      "evaluation_criteria": "Assess the copy itself: specific and credible subject line; opening that references a researched trigger about that company rather than generic flattery; a clearly stated problem in the prospect's language; brief evidence or peer proof point; one low-friction ask; no multi-paragraph feature dump; correct tone for a VP; mobile-readable length. LinkedIn message should be shorter, non-duplicative and conversational. Rationale should explain personalisation source, the single hypothesis being tested, why the CTA is low-friction, and how it fits a multi-touch sequence. Deduct heavily for template-filler personalisation ('I loved your post'), feature lists, multiple asks, or copy that could be sent to any company unchanged."
+    },
+    {
+      "question_order": 7,
+      "question_type": "SUBJECTIVE",
+      "marks": 20,
+      "question_text": "You get a prospect on the phone and have roughly six minutes. Write the discovery questions you would ask to decide whether to book a meeting for an Account Executive, and state exactly what you must learn before you consider the lead qualified.",
+      "instructions": "Write 250-400 words. List the actual questions and your qualification bar.",
+      "evaluation_criteria": "Strong answers open with permission and a crisp reason for the call, then probe current process and pain, quantified impact, who else is affected, what they have tried, timing/compelling event, decision process and who would need to be involved, and budget ownership at a high level. Should state an explicit qualification bar (e.g. fit to ICP + acknowledged problem + relevant stakeholder + plausible timeline) and what would disqualify or nurture instead. Credit for listening-led phrasing, avoiding a pitch, confirming the next step with a specific date/time and sending a recap with attendees and agenda. Deduct for pitching, only asking about budget, or no stated qualification threshold."
+    },
+    {
+      "question_order": 8,
+      "question_type": "SUBJECTIVE",
+      "marks": 20,
+      "question_text": "Your booked-meeting rate has dropped for three consecutive weeks and two of your last four booked meetings were no-shows. Describe how you would diagnose and fix this, and how you would manage your follow-up and CRM discipline to prevent it recurring.",
+      "instructions": "Write 250-400 words. Show the diagnostic path and the concrete corrective actions.",
+      "evaluation_criteria": "Strong answers work funnel metrics stage by stage — list quality/ICP drift, deliverability and open rates, reply and positive-reply rates, connect rates by time of day, sequence step performance, messaging fatigue, competitor noise — and test one variable at a time. No-show fixes: confirmations, calendar invite with agenda and value, reminder cadence, booking closer to the call date, qualifying the attendee's authority and genuine interest, pre-call research shared in advance. Prevention: disciplined task/next-step management in CRM, accurate dispositions, defined follow-up cadence and time-blocking, weekly self-review of metrics, asking for coaching and reviewing call recordings. Deduct for answers that only say 'send more emails' or blame the list without a diagnostic method."
+    }
+  ]
+}

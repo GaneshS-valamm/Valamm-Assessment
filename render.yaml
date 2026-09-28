@@ -1,0 +1,75 @@
+# Render Blueprint - deploys the FastAPI backend and the Vite frontend.
+#
+# Usage: Render dashboard -> New -> Blueprint -> pick this repo.
+# Secrets marked `sync: false` must be filled in the Render dashboard; they are
+# deliberately not committed.
+services:
+  # ---------------------------------------------------------------- backend
+  - type: web
+    name: valamm-assessment-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    # Resumes are written to disk. Without a persistent disk they are lost on every
+    # deploy and restart (the API then returns 410 for those downloads). A paid plan
+    # is required for disks - see README section 9 for the object-storage alternative.
+    # disk:
+    #   name: resume-storage
+    #   mountPath: /opt/render/project/src/backend/storage
+    #   sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      # Paste the Internal Database URL of your Render Postgres instance
+      # (dpg-dat17kp7lnhs73b8btj0-a). Leaving it blank falls back to SQLite, which is
+      # wiped on every deploy - do not ship that.
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_USER_ID
+        value: admin
+      # bcrypt hash, generated with:
+      #   python -c "import bcrypt;print(bcrypt.hashpw(b'YourPassword',bcrypt.gensalt()).decode())"
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE_MINUTES
+        value: "480"
+      # Must be the deployed frontend origin, so generated assessment links work.
+      - key: FRONTEND_BASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: DEFAULT_DURATION_MINUTES
+        value: "60"
+      - key: DISPLAY_TIMEZONE
+        value: Asia/Kolkata
+      - key: RESUME_STORAGE_BACKEND
+        value: local
+      - key: RESUME_STORAGE_DIR
+        value: storage/resumes
+      - key: MAX_RESUME_SIZE_MB
+        value: "10"
+      - key: RESUME_REQUIRED_BEFORE_START
+        value: "true"
+
+  # --------------------------------------------------------------- frontend
+  - type: web
+    name: valamm-assessment-web
+    runtime: static
+    rootDir: frontend
+    plan: free
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      # The backend's public URL, e.g. https://valamm-assessment-api.onrender.com
+      - key: VITE_API_BASE_URL
+        sync: false
+    routes:
+      # Client-side routing: every unknown path must serve index.html.
+      - type: rewrite
+        source: /*
+        destination: /index.html

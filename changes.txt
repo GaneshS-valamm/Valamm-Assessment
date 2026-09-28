@@ -1,0 +1,237 @@
+Update my existing Role-Based Recruitment Assessment Application to add a complete Resume Upload and Admin Resume Management feature.
+
+IMPORTANT:
+
+* Modify the existing application only.
+* Do not rebuild the application from scratch.
+* Do not change or finalize the database technology. Keep the existing database and architecture unchanged.
+* Do not modify the existing login, role selection, question papers, assessment generation, candidate answers, or scoring logic except where necessary to integrate resumes.
+* Implement the actual frontend, backend, file upload, and admin functionality. Do not create a UI-only mockup.
+
+## 1. Candidate Resume Upload
+
+When a candidate opens their generated assessment link, display a resume upload section before the assessment begins.
+
+Allow the candidate to upload their resume in PDF or DOCX format.
+
+Show:
+
+* Candidate name, pre-filled from the assessment link.
+* Candidate email, pre-filled.
+* Assigned role.
+* Resume upload button.
+* Uploaded file name.
+* Upload status.
+
+Requirements:
+
+1. Resume upload is mandatory before starting the assessment.
+2. Validate file type, file size, and file contents on the backend.
+3. Allow the candidate to replace their resume before submitting the assessment.
+4. Preserve the uploaded resume when the candidate refreshes or reopens the same assessment link.
+5. Associate every resume with the correct candidate, assessment ID, and selected role.
+6. Once the candidate submits the assessment, lock the submitted resume and preserve the exact version.
+7. Do not allow candidates to access or modify another candidate's resume.
+
+Use a configurable maximum upload size of 10 MB per file.
+
+## 2. Admin Dashboard – Resume Management
+
+Add a new sidebar menu called "Resumes" to the existing admin dashboard.
+
+Whenever a candidate uploads a new resume, automatically create a record and display it in the admin's Resumes section.
+
+The admin should be able to see newly uploaded resumes without manually refreshing the entire page. Use simple polling or an existing real-time mechanism.
+
+Display a notification badge showing the number of new, unreviewed resumes.
+
+Create a table with the following columns:
+
+* Candidate Name
+* Candidate Email
+* Applied Role
+* Resume File Name
+* Uploaded Date and Time
+* Resume Status
+* Assessment Status
+* Action
+
+Resume statuses:
+
+* New
+* Reviewed
+* Shortlisted
+
+Assessment statuses should use the existing assessment status values.
+
+Show the latest uploaded resumes first.
+
+Add search and filters for candidate name, email, role, resume status, and assessment status.
+
+## 3. View and Download Resumes
+
+When the admin clicks "View Resume", open a details page or modal displaying:
+
+* Candidate name and email.
+* Applied role.
+* Resume filename.
+* Upload timestamp.
+* Resume review status.
+* Associated assessment link or assessment details.
+
+For PDF files, provide an embedded preview where possible.
+
+For DOCX files, provide a download option or preview if supported.
+
+Provide buttons to:
+
+* View Resume
+* Download Resume
+* Mark as Reviewed
+* Mark as Shortlisted
+* View Assessment
+
+All resume downloads and previews must be accessible only to authenticated admins.
+
+Use secure file access. Do not expose resumes through public URLs.
+
+## 4. Resume Storage
+
+Implement a storage service that keeps resume file storage separate from the existing database.
+
+For now, do not decide or hardcode any specific cloud database or storage provider.
+
+Create a configurable storage abstraction so the file storage provider can be selected later.
+
+For local development, use a dedicated backend upload directory outside publicly served frontend assets.
+
+Store only resume metadata and the file storage reference in the existing database.
+
+Use unique server-generated filenames to prevent collisions.
+
+Never use the original filename directly as a filesystem path.
+
+Do not store resume file binaries in the database.
+
+Keep the storage implementation modular so it can later be connected to Supabase Storage, Amazon S3, or another private object storage provider without rewriting the candidate and admin workflows.
+
+If the existing project already has a storage service, reuse it.
+
+Do not claim that local files are permanently stored in production. Keep the storage provider configurable and document the requirements for persistent storage when deploying.
+
+## 5. Database Changes
+
+Inspect the existing database schema and add only the necessary resume-related table or fields.
+
+Create a candidate_resumes table if an equivalent table does not already exist.
+
+Include the following fields:
+
+* id: Primary key.
+* assessment_id: Foreign key to the existing assessment record.
+* candidate_name.
+* candidate_email.
+* role_id: Foreign key to the existing role record.
+* original_filename.
+* stored_filename or storage_key.
+* content_type.
+* file_size.
+* resume_status: NEW, REVIEWED, or SHORTLISTED.
+* uploaded_at.
+* reviewed_at.
+* reviewed_by: Existing admin user reference, if available.
+* created_at.
+* updated_at.
+
+Use the existing database conventions and migration or initialization approach.
+
+If a candidate replaces a resume before submission, preserve the earlier version or maintain resume version history.
+
+Never delete or overwrite a resume associated with a submitted assessment.
+
+Do not modify unrelated tables or existing assessment records.
+
+## 6. Backend APIs
+
+Implement working endpoints using the existing backend framework and conventions.
+
+Add endpoints equivalent to:
+
+POST /api/assessments/{token}/resume
+
+Upload or replace a resume for the candidate's own valid assessment.
+
+GET /api/admin/resumes
+
+Return resume records with candidate details, role, assessment status, and resume status. Support search, filters, and pagination.
+
+GET /api/admin/resumes/{resume_id}
+
+Return resume metadata and associated assessment details.
+
+GET /api/admin/resumes/{resume_id}/download
+
+Securely serve the original uploaded file to an authenticated admin.
+
+PUT /api/admin/resumes/{resume_id}/status
+
+Update the resume status and record the reviewing admin and timestamp.
+
+Ensure all admin endpoints require authentication.
+
+Validate candidate assessment tokens for uploads.
+
+Use backend validation and appropriate error handling.
+
+Do not expose filesystem paths, storage credentials, or private storage keys to candidates.
+
+## 7. Integration with Existing Assessment Workflow
+
+Integrate resume management into the existing application without breaking the current functionality.
+
+The complete workflow must be:
+
+1. Admin logs in.
+2. Admin creates an assessment for a candidate and selects one of the existing four roles.
+3. Admin copies and sends the generated assessment link.
+4. Candidate opens the link and sees their name and assigned role.
+5. Candidate uploads their resume.
+6. The resume is stored and linked to the candidate's assessment.
+7. The admin dashboard displays the new resume and updates the notification count.
+8. Admin can preview, download, and review the resume.
+9. Candidate completes and submits the existing assessment.
+10. Admin can open the candidate's assessment results and access the associated resume from the same candidate record.
+
+The four existing roles must remain unchanged:
+
+* Enterprise Sales Manager – Agentic AI Solutions
+* AWS Partner Operations & Marketplace Specialist
+* Sales Development Representative (SDR) – Enterprise Sales
+* Account Manager – Enterprise Sales
+
+## 8. Implementation and Testing
+
+First inspect the existing project structure and identify the current assessment, candidate, authentication, and database implementations.
+
+Reuse the existing components, API routes, database models, and styling conventions.
+
+Implement the feature in the current codebase.
+
+Do not overwrite unrelated files or change existing assessment functionality.
+
+Test the following:
+
+* Candidate can upload a valid PDF.
+* Candidate can upload a valid DOCX.
+* Invalid file types are rejected.
+* Oversized files are rejected.
+* Resume is associated with the correct candidate and role.
+* Admin sees the new resume in the dashboard.
+* Admin can download and preview the resume.
+* Admin can mark it as Reviewed or Shortlisted.
+* Resume remains accessible after backend restart when persistent storage is configured.
+* Existing assessment generation, question display, answer submission, and results continue working.
+
+At the end, summarize the files changed, any database migrations required, and the exact commands to run and test the updated application.
+
+Start implementing these changes in the existing project now.

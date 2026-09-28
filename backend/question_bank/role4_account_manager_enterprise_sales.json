@@ -1,0 +1,91 @@
+{
+  "role_name": "Account Manager – Enterprise Sales",
+  "role_description": "Owns retention, renewal and expansion of existing enterprise accounts through relationship depth, account planning and customer success coordination.",
+  "paper_title": "Account Manager – Enterprise Sales | Assessment Paper",
+  "questions": [
+    {
+      "question_order": 1,
+      "question_type": "OBJECTIVE",
+      "marks": 5,
+      "question_text": "Which signal is the strongest early indicator of renewal risk in an enterprise account?",
+      "options": [
+        "The customer's executive sponsor leaves and no new sponsor is engaged, while active usage declines quarter over quarter.",
+        "The customer submits a higher number of product support tickets than last quarter.",
+        "The customer asks for a product roadmap briefing.",
+        "The customer's procurement team requests an updated W-9 and vendor form."
+      ],
+      "correct_option_order": 1
+    },
+    {
+      "question_order": 2,
+      "question_type": "OBJECTIVE",
+      "marks": 5,
+      "question_text": "An enterprise customer is 90 days from renewal and has only deployed the product in one of five planned business units. What should the Account Manager prioritise first?",
+      "options": [
+        "Immediately propose a five-business-unit expansion upsell to grow the contract.",
+        "Diagnose why adoption stalled in the other units, demonstrate realised value in the live unit, and build a joint plan before discussing commercials.",
+        "Offer a discount on renewal to keep the customer happy.",
+        "Wait for the customer to raise the issue during renewal negotiation."
+      ],
+      "correct_option_order": 2
+    },
+    {
+      "question_order": 3,
+      "question_type": "OBJECTIVE",
+      "marks": 5,
+      "question_text": "What is the purpose of stakeholder mapping in an existing enterprise account?",
+      "options": [
+        "To record every employee's contact details for marketing campaigns.",
+        "To identify sponsors, champions, detractors, influencers and their relationships, so coverage and influence gaps can be closed before they become risks.",
+        "To determine which contact responds to email fastest.",
+        "To satisfy an internal CRM reporting requirement."
+      ],
+      "correct_option_order": 2
+    },
+    {
+      "question_order": 4,
+      "question_type": "OBJECTIVE",
+      "marks": 5,
+      "question_text": "Which approach best distinguishes effective cross-selling in an enterprise account from a poorly timed upsell?",
+      "options": [
+        "Proposing every available module at the start of each quarter to maximise coverage.",
+        "Anchoring the recommendation to a business outcome the customer has already achieved or explicitly stated as a next priority.",
+        "Waiting until the renewal negotiation to introduce all additional products at once.",
+        "Offering additional products only when the customer's budget cycle opens, regardless of need."
+      ],
+      "correct_option_order": 2
+    },
+    {
+      "question_order": 5,
+      "question_type": "SUBJECTIVE",
+      "marks": 20,
+      "question_text": "You inherit a $1.4M ARR enterprise account renewing in five months. Your predecessor left abruptly, the executive sponsor who signed the original deal has moved to a competitor, product usage is down 30% year over year, and a support escalation last quarter went badly. Write your 30/60/90-day plan for this account.",
+      "instructions": "Write 250-400 words. Be specific about actions, sequence and what success looks like at each checkpoint.",
+      "evaluation_criteria": "Strong answers: First 30 days — internal review (contract terms, usage data, support history, open escalations, CS/delivery input), rapid stakeholder outreach, listening-led meetings, explicit acknowledgement of the escalation with a remediation owner, and a rebuilt stakeholder map to find a new sponsor. Days 30-60 — root-cause the usage decline, agree a joint success plan with measurable adoption milestones, run an executive business review with realised value and a credible forward plan, identify and cultivate a new executive sponsor. Days 60-90 — de-risk the renewal (early commercial conversation, options, multi-year or restructured scope), escalate internally for support, document risk in the forecast honestly, and set up expansion only once value is re-established. Credit for candour about risk, internal alignment, measurable checkpoints, and prioritising trust repair before commercials. Deduct for leading with an upsell, discount-first thinking, or no root-cause work."
+    },
+    {
+      "question_order": 6,
+      "question_type": "SUBJECTIVE",
+      "marks": 20,
+      "question_text": "The same customer's new Head of Operations tells you their team is evaluating a competitor and \"needs to see a much stronger business case to justify renewing at this price.\" Describe how you would respond over the following weeks and how you would build that business case.",
+      "instructions": "Write 250-400 words. Include what data you would gather and how you would handle the competitive threat and the pricing pressure.",
+      "evaluation_criteria": "Strong answers: treat it as a real threat, ask what criteria the evaluation will be judged on and who is involved, and establish the decision timeline. Build the business case from customer-side evidence — usage and outcome data, time/cost saved, incidents avoided, integrations and process embedded, switching cost and migration risk, internal user testimony — quantified in the customer's own metrics. Handle competition by differentiating on validated outcomes and total cost rather than disparaging, and by exposing the gaps in the competitor's fit against the stated criteria. On price: understand the underlying driver (budget cut vs. perceived value gap), and trade concessions for term, scope, payment timing or reference rather than conceding unilaterally. Should include multi-threading beyond the new Head of Ops, an exec-to-exec touch, and internal alignment with CS/product/leadership. Deduct for immediate discounting, competitor bashing, or an unquantified business case."
+    },
+    {
+      "question_order": 7,
+      "question_type": "SUBJECTIVE",
+      "marks": 20,
+      "question_text": "Write the account plan you would maintain for a strategic enterprise customer. Describe each section, how you would keep it current, and how you would identify and sequence expansion opportunities within it.",
+      "instructions": "Write 250-400 words. Show structure and substance, and be specific about the expansion logic.",
+      "evaluation_criteria": "Strong answers include: account overview and the customer's own business strategy/priorities; current footprint (products, business units, geographies, ARR, contract dates and terms); stakeholder map with sponsorship and coverage gaps; realised value and success metrics to date; open risks with owners and mitigation; whitespace analysis of units/use cases/products not yet sold; prioritised expansion plays with entry point, value hypothesis, likely stakeholders and timing tied to the customer's budget and initiative cycles; relationship and meeting cadence; competitive landscape in the account. Currency maintained via quarterly refresh, EBR outputs, usage-data review and CRM updates after every significant interaction. Credit for sequencing expansion behind demonstrated value and for tying plays to the customer's roadmap, not the vendor's quarter. Deduct for a static template with no risk view or no whitespace logic."
+    },
+    {
+      "question_order": 8,
+      "question_type": "SUBJECTIVE",
+      "marks": 20,
+      "question_text": "Describe how you would work with Customer Success, Support and Product to protect and grow a portfolio of enterprise accounts. Include how you divide responsibilities, your operating cadence, and how you handle a situation where a promised product capability slips by two quarters.",
+      "instructions": "Write 250-400 words. Be concrete about the cadence and about the slipped-commitment scenario.",
+      "evaluation_criteria": "Strong answers define clear boundaries — AM owns commercial relationship, renewal, expansion and executive alignment; CS owns adoption, onboarding and success plan execution; Support owns incident resolution; Product owns roadmap and feasibility — with shared ownership of the account health view. Cadence: weekly account syncs on at-risk accounts, joint success-plan reviews, escalation paths with defined severity and response expectations, quarterly EBRs, and a shared health scorecard combining usage, sentiment, support and commercial signals. For the slipped capability: get the facts and revised date from Product, notify the customer proactively rather than letting them discover it, apologise without over-committing, quantify the impact on their plan, offer interim workarounds or partner/professional-services options, revise the success plan and commercial expectations if the capability underpinned the purchase, and secure a Product commitment to a direct customer conversation. Credit for proactive transparency and internal advocacy. Deduct for concealing the slip, blaming internal teams to the customer, or making new unverified promises."
+    }
+  ]
+}
