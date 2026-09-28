@@ -484,6 +484,16 @@ Security checks that also passed: bogus token → 404; another candidate's `ques
 | `valamm-assessment-api` | Python web service | `backend` | `python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
 | `valamm-assessment-web` | Static site | `frontend` | `npm ci && npm run build` -> `dist` |
 
+A static site has **no start command** — Render builds once and serves `dist` from its CDN.
+
+**The rewrite rule is not optional.** Under the static site's *Redirects/Rewrites*, add source `/*`
+→ destination `/index.html`, action **Rewrite**. This is a single-page app: `/login`,
+`/admin/candidates` and `/assessment/<token>` are not files on disk, so without the rule every path
+except `/` returns 404 and candidate links break. The Blueprint configures this automatically; a
+site created by hand in the dashboard does not. The build also writes `dist/404.html` as a copy of
+`index.html`, which makes deep links load even if the rule is missing, but they are then served with
+a 404 status — add the rule.
+
 Then fill in the env vars Render marks as required (they are intentionally not committed):
 
 **On the API service**
