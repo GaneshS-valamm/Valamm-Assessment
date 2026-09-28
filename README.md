@@ -394,8 +394,8 @@ truth: the JSON files in `backend/question_bank/`.
 | Sales Development Representative (SDR) – Enterprise Sales | `SDR_Candidate_Screening_Form_1.docx` | 15 |
 | Account Manager – Enterprise Sales | `Account_Manager_Candidate_Screening_Form (3).docx` | 16 |
 
-Every paper ends with the same closing question: *"When are you available for the interviews? Please
-mention the date and the time slot."*
+Every paper ends with the same closing question: *"Please share your convenient days and preferred
+time slots so that we will try to schedule the calls accordingly."*
 
 The Enterprise Sales Manager paper carries the **same questions as the Account Manager paper**, as
 requested, rather than the questions from its own source document.

@@ -112,9 +112,9 @@
     {
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "When are you available for the interviews? Please mention the date and the time slot.",
-      "instructions": "For example: 12 March, 10:00-11:00 AM IST. Feel free to give more than one option.",
-      "evaluation_criteria": "Scheduling information. Look for at least one specific date with a time slot. Multiple options make it easier to arrange the panel. Note any constraint the candidate mentions (notice period, current-employer hours, time zone) and pass it to whoever books the interview.",
+      "question_text": "Please share your convenient days and preferred time slots so that we will try to schedule the calls accordingly.",
+      "instructions": "For example: Tuesday to Thursday, 10:00 AM - 1:00 PM IST. More than one option helps us find a time that works for everyone.",
+      "evaluation_criteria": "Scheduling information. Look for at least one day with a time slot; several options make the panel easier to arrange. Note any constraint the candidate mentions (notice period, current-employer hours, time zone) and pass it to whoever books the calls.",
       "question_order": 15
     }
   ]
