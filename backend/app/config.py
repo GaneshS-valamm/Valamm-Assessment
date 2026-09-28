@@ -71,7 +71,17 @@ class Settings(BaseSettings):
 
     @property
     def cors_origin_list(self) -> list[str]:
-        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+        """Allowed browser origins.
+
+        FRONTEND_BASE_URL is always trusted - it is the host we generate candidate links
+        for, so the admin app is served from it by definition. That way a deployment only
+        has to set FRONTEND_BASE_URL correctly; CORS_ORIGINS is for any extra origins.
+        """
+        origins = [o.strip().rstrip("/") for o in self.CORS_ORIGINS.split(",") if o.strip()]
+        frontend = self.FRONTEND_BASE_URL.strip().rstrip("/")
+        if frontend and frontend not in origins:
+            origins.append(frontend)
+        return origins
 
 
 @lru_cache
