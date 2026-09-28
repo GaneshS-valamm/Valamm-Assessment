@@ -14,6 +14,7 @@ from ..models import AdminUser, Assessment, AssessmentStatus, ResumeStatus, Uplo
 from ..schemas import (
     MessageOut,
     ResumeDetailOut,
+    ResumePreviewOut,
     ResumeListOut,
     ResumeOut,
     ResumeRowOut,
@@ -21,6 +22,7 @@ from ..schemas import (
 )
 from ..security import rate_limit_exceeded
 from ..services import assessment_service, resume_service
+from ..services.docx_preview import extract_text
 from ..services.storage_service import StorageError, get_storage
 from ..services.token_service import resolve_assessment
 
@@ -184,6 +186,35 @@ async def admin_upload_resume(
     return resume_service.to_row(resume)
 
 
+def _preview_payload(resume) -> dict:
+    """Build an inline-viewable payload: PDFs stream as-is, DOCX becomes text."""
+    if resume.content_type == "application/pdf":
+        return {
+            "resume_id": resume.id,
+            "original_filename": resume.original_filename,
+            "content_type": resume.content_type,
+            "file_size": resume.file_size,
+            "kind": "pdf",
+            "text": None,
+        }
+    try:
+        data = get_storage().load(resume.storage_key)
+    except StorageError:
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="The stored file is no longer available in the storage backend.",
+        ) from None
+    text = extract_text(data)
+    return {
+        "resume_id": resume.id,
+        "original_filename": resume.original_filename,
+        "content_type": resume.content_type,
+        "file_size": resume.file_size,
+        "kind": "text" if text else "unsupported",
+        "text": text or None,
+    }
+
+
 @admin_router.get("", response_model=ResumeListOut)
 def list_resumes(
     search: str | None = None,
@@ -304,3 +335,25 @@ def update_status(
     resume = resume_service.get_resume(db, resume_id)
     resume = resume_service.set_status(db, resume, payload.resume_status, admin.id)
     return resume_service.to_row(resume)
+
+@admin_router.get("/{resume_id}/preview", response_model=ResumePreviewOut)
+def preview_resume(
+    resume_id: int, db: Session = Depends(get_db), _: AdminUser = Depends(get_current_admin)
+) -> dict:
+    """Content for opening a resume in the panel without downloading it."""
+    return _preview_payload(resume_service.get_resume(db, resume_id))
+
+@candidate_router.get("/{token}/resume/preview", response_model=ResumePreviewOut)
+def preview_own_resume(
+    token: str, request: Request, db: Session = Depends(get_db)
+) -> dict:
+    """Same inline preview for the candidate reviewing their own resume."""
+    _guard_candidate(request, token)
+    assessment = resolve_assessment(db, token)
+    resume = resume_service.current_resume(db, assessment.id)
+    if resume is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="No resume is on file for you yet."
+        )
+    return _preview_payload(resume)
+

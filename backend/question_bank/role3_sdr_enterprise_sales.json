@@ -2,28 +2,28 @@
   "role_name": "Sales Development Representative (SDR) – Enterprise Sales",
   "role_description": "Researches and qualifies enterprise prospects, runs multi-channel outbound, books qualified discovery meetings and maintains CRM hygiene. Bengaluru, work-from-office.",
   "paper_title": "Candidate Screening Form – SDR, Enterprise Sales",
-  "paper_notes": "Transcribed from the official Valamm.AI candidate screening form (SDR_Candidate_Screening_Form_1.docx). All 14 questions are free-text; marks are a weighting applied for this platform and are not part of the original form.",
+  "paper_notes": "Transcribed verbatim from SDR_Candidate_Screening_Form_1.docx. All questions are free-text. Marks are not used - this is a screening form, reviewed by a human, not a scored test.",
   "questions": [
     {
       "question_order": 1,
       "question_type": "SUBJECTIVE",
-      "marks": 2,
+      "marks": 1,
       "question_text": "Where are you based these days?",
       "instructions": "Answer in plain, simple language and avoid jargon or buzzwords.",
-      "evaluation_criteria": "Informational. Award full marks for a clear, specific answer. Note whether the location is compatible with daily attendance at the Bengaluru office, and flag any relocation requirement for the interviewer."
+      "evaluation_criteria": "Informational. Note whether the location is compatible with daily attendance at the Bengaluru office, and flag any relocation requirement for the interviewer."
     },
     {
       "question_order": 2,
       "question_type": "SUBJECTIVE",
-      "marks": 4,
+      "marks": 1,
       "question_text": "This role is based in Bengaluru and is a work-from-office (WFO) position. Are you comfortable with this, and would you be able to work from our Bengaluru office on a daily basis?",
       "instructions": "Please state clearly whether you can attend the Bengaluru office daily.",
-      "evaluation_criteria": "Screening gate. Full marks for an unambiguous yes with no caveats. Reduce for conditional answers (hybrid expectation, relocation timeline, notice-dependent). A clear no should be flagged to the interviewer as a knock-out for this role regardless of the rest of the form."
+      "evaluation_criteria": "Screening gate. Look for an unambiguous yes with no caveats. Treat conditional answers cautiously (hybrid expectation, relocation timeline, notice-dependent). A clear no should be flagged to the interviewer as a knock-out for this role regardless of the rest of the form."
     },
     {
       "question_order": 3,
       "question_type": "SUBJECTIVE",
-      "marks": 10,
+      "marks": 1,
       "question_text": "What has been your past experience in similar roles (SDR, lead generation, or business development)?",
       "instructions": "Wherever possible, back up your answer with a real example. Answer in plain, simple language.",
       "evaluation_criteria": "Look for directly relevant outbound experience: named employers and dates, whether the motion was outbound or inbound, B2B vs. B2C, enterprise vs. SMB, deal sizes and sales cycles, and what the candidate personally owned (research, outreach, qualification, booking) versus what the wider team did. Strong answers are specific and verifiable; deduct for vague titles with no description of the actual daily work."
@@ -31,23 +31,23 @@
     {
       "question_order": 4,
       "question_type": "SUBJECTIVE",
-      "marks": 10,
+      "marks": 1,
       "question_text": "How would you define your current role, and how do you see yourself fitting into this SDR position at Valamm.AI?",
       "instructions": "Answer in plain, simple language and avoid jargon or buzzwords.",
-      "evaluation_criteria": "Two parts, both needed. First: an accurate, concrete description of what they do today. Second: a considered link to this role — evidence they have read what the position involves (enterprise outbound for an AI product) and a genuine reason for the move. Credit realistic self-assessment, including gaps they intend to close. Deduct for generic ambition statements, flattery, or an answer that would fit any job advert."
+      "evaluation_criteria": "Two parts, both needed. First: an accurate, concrete description of what they do today. Second: a considered link to this role — evidence they have read what the position involves (enterprise outbound for an AI product) and a genuine reason for the move. Credit realistic self-assessment, including gaps they intend to close. Treat as weak: generic ambition statements, flattery, or an answer that would fit any job advert."
     },
     {
       "question_order": 5,
       "question_type": "SUBJECTIVE",
-      "marks": 4,
+      "marks": 1,
       "question_text": "How many years of experience do you have specifically in enterprise sales, SDR, or lead-generation roles?",
       "instructions": "Please give the figure in years, and say which roles it covers.",
-      "evaluation_criteria": "Informational. Award full marks for a precise figure that is consistent with the experience described in question 3. Reduce where the number is inflated by unrelated roles, or contradicts the employment history given elsewhere in the form."
+      "evaluation_criteria": "Informational. Look for a precise figure consistent with the experience described in question 3. Note where the number appears inflated by unrelated roles, or contradicts the employment history given elsewhere in the form."
     },
     {
       "question_order": 6,
       "question_type": "SUBJECTIVE",
-      "marks": 8,
+      "marks": 1,
       "question_text": "Have you worked with global / international technology, SaaS, or AI companies before? Please describe briefly.",
       "instructions": "Answer in plain, simple language. Name the companies or markets where you can.",
       "evaluation_criteria": "Look for evidence of selling into or from an international context: named companies or markets, time-zone coverage, the buyer personas reached, and comfort with English-language enterprise communication. Experience of a technical or AI product is a plus, as is exposure to longer enterprise cycles. A candid 'no, but here is the closest thing I have done' is worth partial credit; deduct for name-dropping with no description of the candidate's own involvement."
@@ -55,66 +55,66 @@
     {
       "question_order": 7,
       "question_type": "SUBJECTIVE",
-      "marks": 6,
+      "marks": 1,
       "question_text": "Which CRM and sales-engagement tools have you used?",
       "instructions": "For example: Salesforce, HubSpot, Zoho, Apollo, Outreach, LinkedIn Sales Navigator. Please say how you used each one.",
-      "evaluation_criteria": "Credit hands-on depth over a list of logos: what they actually did in each tool (sequences, cadences, data hygiene, list building, reporting, dashboards), and whether they built things themselves or only worked inside someone else's setup. At least one mainstream CRM plus one prospecting or engagement tool is the expected baseline. Deduct for an unexplained list."
+      "evaluation_criteria": "Credit hands-on depth over a list of logos: what they actually did in each tool (sequences, cadences, data hygiene, list building, reporting, dashboards), and whether they built things themselves or only worked inside someone else's setup. At least one mainstream CRM plus one prospecting or engagement tool is the expected baseline. Treat as weak: an unexplained list."
     },
     {
       "question_order": 8,
       "question_type": "SUBJECTIVE",
-      "marks": 6,
+      "marks": 1,
       "question_text": "Are you comfortable making structured telephonic / cold outreach calls to enterprise decision-makers on a daily basis?",
       "instructions": "Please answer directly, and describe your current call volumes if you have them.",
-      "evaluation_criteria": "Core requirement of the role. Full marks for an unambiguous yes supported by evidence — current daily or weekly call volumes, seniority of the people called, how they handle gatekeepers and rejection. Reduce for hedged answers or a stated preference for email and social only. Flag a clear reluctance to cold call to the interviewer."
+      "evaluation_criteria": "Core requirement of the role. Look for an unambiguous yes supported by evidence — current daily or weekly call volumes, seniority of the people called, how they handle gatekeepers and rejection. Treat hedged answers as a concern or a stated preference for email and social only. Flag a clear reluctance to cold call to the interviewer."
     },
     {
       "question_order": 9,
       "question_type": "SUBJECTIVE",
-      "marks": 12,
+      "marks": 1,
       "question_text": "Have you worked against monthly or quarterly targets (e.g. qualified meetings booked, pipeline generated)? What were your typical numbers?",
       "instructions": "Please give real figures: your target, your actual performance, and the period.",
-      "evaluation_criteria": "The strongest signal in this form. Look for specific, plausible numbers: the quota itself, attainment against it, meetings booked per month, pipeline value generated, conversion rates between stages, and consistency over several periods rather than one good quarter. Credit candidates who know their own metrics without prompting and who distinguish qualified meetings from raw activity. Deduct heavily for 'always exceeded targets' with no figures, or numbers that are internally inconsistent."
+      "evaluation_criteria": "The strongest signal in this form. Look for specific, plausible numbers: the quota itself, attainment against it, meetings booked per month, pipeline value generated, conversion rates between stages, and consistency over several periods rather than one good quarter. Credit candidates who know their own metrics without prompting and who distinguish qualified meetings from raw activity. Treat as weak: 'always exceeded targets' with no figures, or numbers that are internally inconsistent."
     },
     {
       "question_order": 10,
       "question_type": "SUBJECTIVE",
-      "marks": 14,
+      "marks": 1,
       "question_text": "Briefly describe a time you converted a cold or difficult prospect into a qualified opportunity. What was your approach?",
       "instructions": "Use a real example. Describe what you did step by step, in plain language.",
-      "evaluation_criteria": "Highest-weighted question: it tests actual method rather than self-description. Look for a real, coherent narrative — how the account was identified and researched, the specific hook or trigger used, the channels and number of touches, how objections were handled, what the qualification conversation covered, and the outcome. Credit persistence with judgement, personalisation grounded in research, and an honest account of what nearly went wrong. Deduct for a generic playbook with no named situation, or a story where the prospect was in fact already warm."
+      "evaluation_criteria": "Tests actual method rather than self-description. Look for a real, coherent narrative — how the account was identified and researched, the specific hook or trigger used, the channels and number of touches, how objections were handled, what the qualification conversation covered, and the outcome. Credit persistence with judgement, personalisation grounded in research, and an honest account of what nearly went wrong. Treat as weak: a generic playbook with no named situation, or a story where the prospect was in fact already warm."
     },
     {
       "question_order": 11,
       "question_type": "SUBJECTIVE",
-      "marks": 10,
+      "marks": 1,
       "question_text": "Tell me about a recent success in your current role.",
       "instructions": "Use a real example and include the outcome. Avoid jargon or buzzwords.",
-      "evaluation_criteria": "Look for a recent, specific, verifiable achievement with a measurable result, and a clear account of the candidate's own contribution as distinct from the team's. Credit answers that explain why it worked and what was repeatable about it. Deduct for stale examples, vague claims of over-achievement, or successes that were plainly someone else's."
+      "evaluation_criteria": "Look for a recent, specific, verifiable achievement with a measurable result, and a clear account of the candidate's own contribution as distinct from the team's. Credit answers that explain why it worked and what was repeatable about it. Treat as weak: stale examples, vague claims of over-achievement, or successes that were plainly someone else's."
     },
     {
       "question_order": 12,
       "question_type": "SUBJECTIVE",
-      "marks": 10,
+      "marks": 1,
       "question_text": "Tell me about a recent failure you've had, and why.",
       "instructions": "For example: lost to a competitor, a pricing challenge, or something else. Please be candid.",
-      "evaluation_criteria": "Tests self-awareness and coachability. Look for a real failure owned without deflection, an honest diagnosis of the cause, and a specific change in behaviour that followed. Credit candour about their own contribution to the loss. Deduct for a humblebrag ('I work too hard'), a trivial example, blaming product, pricing, marketing or the prospect entirely, or a claim to have had no recent failures."
+      "evaluation_criteria": "Tests self-awareness and coachability. Look for a real failure owned without deflection, an honest diagnosis of the cause, and a specific change in behaviour that followed. Credit candour about their own contribution to the loss. Treat as weak: a humblebrag ('I work too hard'), a trivial example, blaming product, pricing, marketing or the prospect entirely, or a claim to have had no recent failures."
     },
     {
       "question_order": 13,
       "question_type": "SUBJECTIVE",
-      "marks": 2,
+      "marks": 1,
       "question_text": "What is your current notice period, and how soon could you join if selected?",
       "instructions": "Please give the notice period and your realistic earliest joining date.",
-      "evaluation_criteria": "Informational, for offer planning. Award full marks for a clear notice period and a specific earliest start date. Note any buyout requirement or unusually long notice for the interviewer; do not penalise a long notice period on merit."
+      "evaluation_criteria": "Informational, for offer planning. Look for a clear notice period and a specific earliest start date. Note any buyout requirement or unusually long notice for the interviewer; do not penalise a long notice period on merit."
     },
     {
       "question_order": 14,
       "question_type": "SUBJECTIVE",
-      "marks": 2,
+      "marks": 1,
       "question_text": "What is your current CTC, and what is your expected CTC (fixed + variable, if applicable)?",
       "instructions": "Please give both figures, splitting fixed and variable where applicable.",
-      "evaluation_criteria": "Informational, for compensation alignment only. Award full marks for both figures given clearly with a fixed/variable split. Do not score the candidate on the amounts themselves; flag to the interviewer only whether the expectation sits inside the approved band for this role."
+      "evaluation_criteria": "Informational, for compensation alignment only. Look for both figures given clearly with a fixed/variable split. Do not judge the candidate on the amounts themselves; flag to the interviewer only whether the expectation sits inside the approved band for this role."
     }
   ]
 }

@@ -1,91 +1,113 @@
 {
   "role_name": "AWS Partner Operations & Marketplace Specialist",
-  "role_description": "Runs AWS Partner Network programme operations, AWS Marketplace listings, private offers, co-sell motions and partner opportunity reporting.",
-  "paper_title": "AWS Partner Operations & Marketplace Specialist | Assessment Paper",
+  "role_description": "Runs AWS Partner Central operations, AWS Marketplace seller activities and partner opportunity tracking. Bengaluru, full-time, 2-5 years.",
+  "paper_title": "Candidate Screening Form – AWS Partner Operations & Marketplace Specialist",
+  "paper_notes": "Transcribed verbatim from AWS_Partner_Ops_Marketplace_Candidate_Screening_Form (1).docx. The source document's own numbering skips 8, 9, 13 and 14; the 14 questions it contains are renumbered 1-14 here so they display in a continuous sequence. All questions are free-text. Marks are not used - this is a screening form, reviewed by a human, not a scored test.",
   "questions": [
     {
       "question_order": 1,
-      "question_type": "OBJECTIVE",
-      "marks": 5,
-      "question_text": "An ISV wants to transact a negotiated, customer-specific price and payment schedule for its SaaS product through AWS Marketplace. Which mechanism is designed for this?",
-      "options": [
-        "Publishing a second public listing at the discounted price.",
-        "Creating a Private Offer for that specific buyer account with agreed pricing, duration and EULA.",
-        "Issuing the customer a promotional credit code at checkout.",
-        "Asking the customer to purchase at list price and refunding the difference offline."
-      ],
-      "correct_option_order": 2
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Where are you based these days?",
+      "evaluation_criteria": "Informational. Note whether the location is compatible with working from the Bengaluru office, and flag any relocation requirement."
     },
     {
       "question_order": 2,
-      "question_type": "OBJECTIVE",
-      "marks": 5,
-      "question_text": "In the AWS Partner Network, which statement best describes the purpose of registering an opportunity through APN Customer Engagements (ACE)?",
-      "options": [
-        "It is only a marketing formality with no effect on the deal.",
-        "It shares the partner's validated opportunity with AWS to enable co-sell collaboration, AWS seller alignment and programme benefit eligibility.",
-        "It transfers ownership of the customer relationship to AWS.",
-        "It automatically generates the customer's AWS invoice."
-      ],
-      "correct_option_order": 2
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "This is a full-time role based in Bengaluru. Are you comfortable with this, and would you be able to work from our Bengaluru office?",
+      "evaluation_criteria": "Screening gate. Look for an unambiguous yes. Treat a clear no as a knock-out for this role and flag it regardless of the rest of the form."
     },
     {
       "question_order": 3,
-      "question_type": "OBJECTIVE",
-      "marks": 5,
-      "question_text": "A SaaS product is being listed on AWS Marketplace with metered usage pricing. Which integration is required for AWS to bill the customer correctly for consumption?",
-      "options": [
-        "The seller emails a monthly usage spreadsheet to AWS Marketplace operations.",
-        "The product reports usage records to the AWS Marketplace Metering Service, and entitlements are checked via the Entitlement Service.",
-        "Usage is inferred automatically by AWS from CloudTrail with no seller integration.",
-        "The customer self-reports usage in the AWS Billing console."
-      ],
-      "correct_option_order": 2
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "How many years of relevant experience do you have, and how much of it has been hands-on with AWS Partner Central and the AWS Management Console?",
+      "evaluation_criteria": "The role is scoped at 2-5 years. What matters is the split: total experience versus time genuinely hands-on in Partner Central and the AWS console. Check the figure is consistent with the task-level answers in questions 5, 6 and 7. Treat 'worked alongside the AWS team' without personal hands-on time as a weaker answer."
     },
     {
       "question_order": 4,
-      "question_type": "OBJECTIVE",
-      "marks": 5,
-      "question_text": "Which set of items is genuinely required before a new SaaS listing can go live and transact on AWS Marketplace?",
-      "options": [
-        "Only a product logo and a short description.",
-        "A registered seller account with tax and bank (disbursement) details, product listing metadata, pricing model, EULA or standard contract, support terms, and a successful buyer-side subscription/fulfilment test.",
-        "An AWS Premier Tier partner designation and a signed reseller agreement.",
-        "A public AMI and nothing else, since SaaS listings reuse AMI pipelines."
-      ],
-      "correct_option_order": 2
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "How would you define your current role, and how do you see yourself fitting into this AWS Partner Operations & Marketplace Specialist position at Valamm.AI?",
+      "evaluation_criteria": "Two parts, both needed: an accurate description of what they do today, and a considered link to this role showing they understand it is an operations and marketplace role rather than a sales or engineering one. Credit realistic self-assessment including gaps."
     },
     {
       "question_order": 5,
       "question_type": "SUBJECTIVE",
-      "marks": 20,
-      "question_text": "An ISV has a multi-tenant SaaS analytics product and wants to be transacting on AWS Marketplace within eight weeks. Write the end-to-end onboarding plan you would own as Partner Operations Specialist: the workstreams, key milestones, and the dependencies most likely to delay go-live.",
-      "instructions": "Write 250-400 words. Present it as a sequenced plan with owners and the realistic blockers.",
-      "evaluation_criteria": "Strong answers cover: seller registration (AWS Marketplace Management Portal, tax interview, bank/disbursement setup, legal entity checks); product definition (pricing model — contract, subscription, metered, contract-with-consumption; dimensions; free trial); technical integration (SaaS subscription/registration URL, Entitlement and Metering Service, buyer-account resolution token handling); legal (EULA vs. Standard Contract for AWS Marketplace, DPA, support SLA); listing content and AWS listing review cycles; end-to-end test subscription and fulfilment validation; go-live and post-launch reporting. Credit for naming realistic blockers — listing review iterations, tax/banking verification lag, engineering capacity for metering integration, legal redlines — and for a mitigation per blocker. Deduct for vague plans with no technical integration or no legal/finance workstream."
+      "marks": 1,
+      "question_text": "What have you personally done inside AWS Partner Central? Please describe the tasks you owned.",
+      "instructions": "For example: maintaining partner / organization details, APN program requirements and validations, tracking opportunities or referrals, working with AWS partner teams.",
+      "evaluation_criteria": "Core competency question. Look for named, owned tasks: partner profile and organisation maintenance, APN programme requirements and validations, tier or competency work, ACE opportunity submission and referral tracking, funding or MDF requests, and working with a Partner Development Manager or Rep. The distinction between what they did themselves and what they observed is the signal. Deduct for a description of Partner Central as a concept with no personal tasks."
     },
     {
       "question_order": 6,
       "question_type": "SUBJECTIVE",
-      "marks": 20,
-      "question_text": "A large enterprise buyer wants to purchase the ISV's product through AWS Marketplace on negotiated terms: a three-year commitment, a 22% discount off list, annual payments, custom contract language, and drawdown against their AWS commitment. Describe how you would structure and execute this, and what you would verify before it is issued.",
-      "instructions": "Write 250-400 words. Be operationally specific about the steps and the checks.",
-      "evaluation_criteria": "Strong answers describe a multi-year Private Offer: confirming the correct buyer AWS account ID, agreeing pricing and dimensions, setting the flexible payment schedule and instalment dates, offer expiry, and attaching the negotiated EULA / amended contract terms. Should verify internal approvals (discount/deal desk sign-off, margin impact, listing fee), that the buyer's procurement is aligned on AWS as the transacting channel, tax and currency considerations, whether the spend counts toward an EDP/commitment, and channel/reseller involvement (CPPO) if a partner resells. Credit for testing/previewing the offer before issuing, tracking acceptance before expiry, and a clear handoff to finance for disbursement reconciliation. Deduct for answers that only say \"create a private offer\" with no verification or approval steps."
+      "marks": 1,
+      "question_text": "Have you worked on AWS Marketplace seller activities? Describe any listing you created, updated or published, and what your role was.",
+      "instructions": "For example: SaaS listing, product updates, pricing / private offers, publishing and approval workflow.",
+      "evaluation_criteria": "The other core competency. Look for real listing work: seller registration, listing creation or updates, pricing model chosen (contract, subscription, metered), private offers issued, the publishing and AWS review workflow, and how rejections or revisions were handled. Credit anyone who has taken a listing through to transacting. Deduct for generic Marketplace knowledge with no listing they can point to."
     },
     {
       "question_order": 7,
       "question_type": "SUBJECTIVE",
-      "marks": 20,
-      "question_text": "How would you build and run the co-sell motion between the ISV's sales team and AWS account teams? Describe the process, the data hygiene you would enforce, and how you would measure whether the motion is working.",
-      "instructions": "Write 250-400 words. Include the operational cadence and the metrics.",
-      "evaluation_criteria": "Strong answers cover: ACE opportunity submission rules (what qualifies, required fields, validated vs. prospect stage), bi-directional referral handling and SLAs, alignment with AWS Partner Development Manager / Partner Development Rep and AWS account teams, joint account mapping and target-account lists, enablement of the ISV sellers on how to engage AWS sellers, cadence of pipeline reviews, and Marketplace-as-the-transaction-path guidance. Data hygiene: accurate stage and close dates, no duplicate submissions, correct customer account IDs, timely status updates, launched/closed-lost reporting discipline. Metrics: number of ACE-registered opportunities, AWS-originated vs. partner-originated pipeline, win rate, cycle time, Marketplace transacted revenue, co-sell influenced ARR, referral acceptance rate. Deduct for no process detail, no CRM/ACE hygiene, or no measurable outcomes."
+      "marks": 1,
+      "question_text": "Which tasks have you done yourself in the AWS Management Console?",
+      "instructions": "For example: creating IAM users, roles and policies; launching or managing EC2 instances; managing accounts and regions; permissions and access requests.",
+      "evaluation_criteria": "Tests practical console competence, not architecture skill. Look for specific tasks actually performed - IAM users, roles and policies, EC2, account and region management, handling access requests. Credit an understanding of least privilege. An honest short list of things genuinely done beats a long list that reads like the console navigation menu."
     },
     {
       "question_order": 8,
       "question_type": "SUBJECTIVE",
-      "marks": 20,
-      "question_text": "Leadership asks for a monthly AWS partnership operations report. Describe what you would include, where the data comes from, and how you would handle a discrepancy between AWS-reported Marketplace revenue and the ISV's internal finance numbers.",
-      "instructions": "Write 250-400 words. Address both the reporting design and the reconciliation process.",
-      "evaluation_criteria": "Strong answers define a report containing: Marketplace transacted revenue and units, active subscriptions and churn, private offers issued/accepted/expired, ACE pipeline by stage and co-sell influenced revenue, programme and funding status (MDF/POC funds, certifications, tier requirements), listing health and review status, and compliance/documentation items due. Sources named: AWS Marketplace seller reports and disbursement reports, Marketplace Management Portal, ACE/Partner Central, internal CRM, finance ledger. Reconciliation: compare at line-item/offer level, account for AWS listing fees, refunds, credits, disbursement timing lag versus revenue recognition, currency and tax withholding, then document root cause and raise an AWS support/Marketplace ops case where genuinely unexplained. Credit for controls preventing recurrence and for clear escalation ownership. Deduct for answers with no data sources or no structured reconciliation approach."
+      "marks": 1,
+      "question_text": "Have you worked on connecting AWS Partner Central or AWS Marketplace with a CRM? Please describe briefly.",
+      "instructions": "For example: Salesforce, HubSpot, AWS Partner CRM Connector, opportunity sync.",
+      "evaluation_criteria": "Differentiator rather than a requirement. Credit real integration work: the AWS Partner CRM Connector, opportunity or referral sync, field mapping, and how sync failures or duplicates were handled. An honest 'no, but I maintained the data manually and here is how' is worth partial credit."
+    },
+    {
+      "question_order": 9,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Do you hold any AWS certifications? Have you used the AWS CLI or AWS APIs?",
+      "instructions": "For example: Cloud Practitioner, Solutions Architect – Associate, SysOps Administrator.",
+      "evaluation_criteria": "Informational with upside. Note named certifications and whether they are current or lapsed. CLI or API use signals a candidate who can automate rather than only click through the console - a clear plus for an operations role. Absence is not disqualifying at this level."
+    },
+    {
+      "question_order": 10,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Have you worked at a SaaS company, a technology partner organization, or within the AWS ecosystem before? Please describe briefly.",
+      "evaluation_criteria": "Look for relevant environment experience: an ISV or SaaS vendor, a consulting or technology partner, or a role inside the AWS ecosystem. Credit understanding of how partner and vendor organisations actually operate. Name the companies where possible so the claim is checkable."
+    },
+    {
+      "question_order": 11,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Tell me about a recent success in your current role.",
+      "instructions": "Please use a real example and include the outcome.",
+      "evaluation_criteria": "Look for a recent, specific achievement with a measurable outcome and a clear account of the candidate's own contribution as distinct from the team's. Credit an explanation of why it worked and what was repeatable. Deduct for stale or vague examples."
+    },
+    {
+      "question_order": 12,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Tell me about a recent failure or mistake you've had, and why.",
+      "instructions": "For example: a listing rejected, wrong permission given, missed deadline, or something else.",
+      "evaluation_criteria": "Tests self-awareness, and in an operations role the nature of the mistake matters. Look for a real error owned without deflection, an honest root cause, and a specific control or habit adopted afterwards. A permissions or access mistake handled well is a strong answer. Deduct for a humblebrag, a trivial example, or a claim of no mistakes."
+    },
+    {
+      "question_order": 13,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "What is your current notice period, and how soon could you join if selected?",
+      "evaluation_criteria": "Informational, for offer planning. Look for a clear notice period and a realistic earliest start date. Note any buyout requirement; do not penalise a long notice period on merit."
+    },
+    {
+      "question_order": 14,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "What is your current CTC, and what is your expected CTC (fixed + variable, if applicable)?",
+      "evaluation_criteria": "Informational, for compensation alignment only. Look for both figures with a fixed/variable split. Do not judge the candidate on the amounts; note only whether the expectation sits inside the approved band for this role."
     }
   ]
 }

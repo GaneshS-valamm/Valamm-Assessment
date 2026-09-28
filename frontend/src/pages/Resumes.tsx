@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { adminApi, formatDateTime, formatFileSize } from '../services/api';
-import type { ResumeDetail, ResumeRow, ResumeStatus, Role } from '../types';
+import type { ResumeDetail, ResumePreview, ResumeRow, ResumeStatus, Role } from '../types';
 import {
   Alert,
   InterestBadge,
@@ -39,6 +39,12 @@ export default function Resumes() {
   const resumeStatus = params.get('resume_status') ?? '';
   const assessmentStatus = params.get('assessment_status') ?? '';
   const page = Number(params.get('page') ?? 1);
+
+  // Allow other pages to link straight to one resume: /admin/resumes?open=<id>
+  useEffect(() => {
+    const requested = params.get('open');
+    if (requested) setOpenId(Number(requested));
+  }, [params]);
 
   const update = (patch: Record<string, string>) => {
     const next = new URLSearchParams(params);
@@ -199,9 +205,14 @@ export default function Resumes() {
                     <td className="td text-xs">{r.candidate_email}</td>
                     <td className="td min-w-[200px]">{r.role_name}</td>
                     <td className="td">
-                      <span className="block max-w-[200px] truncate text-slate-800">
+                      <button
+                        type="button"
+                        onClick={() => setOpenId(r.id)}
+                        className="block max-w-[200px] truncate text-left font-medium text-brand-600 underline decoration-brand-300 hover:text-brand-800"
+                        title="Open this resume"
+                      >
                         {r.original_filename}
-                      </span>
+                      </button>
                       <span className="text-xs text-slate-500">
                         {formatFileSize(r.file_size)}
                         {r.version > 1 ? ` · v${r.version}` : ''}
@@ -289,6 +300,7 @@ function ResumeDetailModal({
   const [busy, setBusy] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewError, setPreviewError] = useState('');
+  const [textPreview, setTextPreview] = useState<ResumePreview | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -303,26 +315,53 @@ function ResumeDetailModal({
 
   const isPdf = detail?.content_type === 'application/pdf';
 
-  // PDFs get an inline preview; the blob URL is revoked when the modal closes.
+  // Everything is shown without downloading: PDFs render in an embedded viewer, and a
+  // DOCX is converted to text by the backend because browsers cannot display Word files.
   useEffect(() => {
-    if (!detail || !isPdf) return;
+    if (!detail) return;
     let url: string | null = null;
     let alive = true;
-    adminApi
-      .resumeBlobUrl(detail.id, 'inline')
-      .then((u) => {
-        url = u;
-        if (alive) setPreviewUrl(u);
-        else URL.revokeObjectURL(u);
-      })
-      .catch((e) =>
-        alive && setPreviewError(e instanceof Error ? e.message : 'Preview unavailable.'),
-      );
+    setPreviewError('');
+
+    if (isPdf) {
+      adminApi
+        .resumeBlobUrl(detail.id, 'inline')
+        .then((u) => {
+          url = u;
+          if (alive) setPreviewUrl(u);
+          else URL.revokeObjectURL(u);
+        })
+        .catch((e) =>
+          alive && setPreviewError(e instanceof Error ? e.message : 'Preview unavailable.'),
+        );
+    } else {
+      adminApi
+        .resumePreview(detail.id)
+        .then((pv) => alive && setTextPreview(pv))
+        .catch((e) =>
+          alive && setPreviewError(e instanceof Error ? e.message : 'Preview unavailable.'),
+        );
+    }
+
     return () => {
       alive = false;
       if (url) URL.revokeObjectURL(url);
     };
   }, [detail, isPdf]);
+
+  // Open the file full-screen in its own browser tab - still no download.
+  async function openInTab() {
+    if (!detail) return;
+    try {
+      const url = await adminApi.resumeBlobUrl(detail.id, 'inline');
+      const win = window.open(url, '_blank', 'noopener');
+      if (!win) setError('Your browser blocked the new tab. The preview below shows the same file.');
+      // Revoked late so the new tab has time to load it.
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not open the resume.');
+    }
+  }
 
   async function download() {
     if (!detail) return;
@@ -457,29 +496,49 @@ function ResumeDetailModal({
               )}
             </div>
 
-            {/* Preview */}
+            {/* Preview - always inline, never requires a download */}
             <div>
-              <p className="mb-2 text-sm font-semibold text-slate-900">Preview</p>
-              {isPdf ? (
-                previewError ? (
-                  <Alert kind="error">{previewError}</Alert>
-                ) : previewUrl ? (
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-slate-900">Resume</p>
+                {isPdf && (
+                  <button type="button" className="btn-ghost !px-2 !py-1 !text-xs" onClick={openInTab}>
+                    Open in new tab ↗
+                  </button>
+                )}
+              </div>
+              {previewError ? (
+                <Alert kind="error">{previewError}</Alert>
+              ) : isPdf ? (
+                previewUrl ? (
                   <object
                     data={previewUrl}
                     type="application/pdf"
-                    className="h-[460px] w-full rounded-lg border border-slate-200"
+                    className="h-[560px] w-full rounded-lg border border-slate-200"
                   >
-                    <p className="p-4 text-sm text-slate-600">
-                      Your browser cannot display PDFs inline. Use Download Resume instead.
-                    </p>
+                    <iframe
+                      src={previewUrl}
+                      title={detail.original_filename}
+                      className="h-[560px] w-full rounded-lg border border-slate-200"
+                    />
                   </object>
                 ) : (
-                  <Spinner label="Loading preview…" />
+                  <Spinner label="Opening resume…" />
                 )
+              ) : textPreview === null ? (
+                <Spinner label="Opening resume…" />
+              ) : textPreview.kind === 'text' && textPreview.text ? (
+                <div className="max-h-[560px] overflow-auto rounded-lg border border-slate-200 bg-white p-5">
+                  <p className="mb-3 text-xs text-slate-500">
+                    Word document shown as text so it opens here without downloading.
+                  </p>
+                  <pre className="whitespace-pre-wrap break-words font-sans text-sm leading-relaxed text-slate-800">
+                    {textPreview.text}
+                  </pre>
+                </div>
               ) : (
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
-                  DOCX files cannot be previewed in the browser. Use <strong>Download Resume</strong>{' '}
-                  to open it in Word.
+                  This file's text could not be read for display. Use{' '}
+                  <strong>Download Resume</strong> to open it in Word.
                 </div>
               )}
             </div>

@@ -40,7 +40,8 @@ export default function QuestionPapers() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Question Papers</h1>
         <p className="text-sm text-slate-500">
-          Versioned role papers. Answer keys are stored on the backend and never sent to candidates.
+          The four screening forms. Reviewer guidance is stored on the backend and never sent to
+          candidates.
         </p>
       </div>
 
@@ -63,8 +64,7 @@ export default function QuestionPapers() {
                 </span>
               </div>
               <p className="mt-2 text-xs text-slate-500">
-                {p.question_count} questions · {p.total_marks} marks · created{' '}
-                {formatDateTime(p.created_at)}
+                {p.question_count} questions · created {formatDateTime(p.created_at)}
               </p>
             </button>
           ))}
@@ -82,7 +82,7 @@ export default function QuestionPapers() {
                   <h2 className="font-semibold text-slate-900">{selected.paper_title}</h2>
                   <p className="mt-1 text-xs text-slate-500">
                     {selected.role_name} · version {selected.version} ·{' '}
-                    {selected.is_active ? 'Active' : 'Archived'} · {selected.total_marks} total marks
+                    {selected.is_active ? 'Active' : 'Archived'} · {selected.questions.length} questions
                   </p>
                 </div>
                 <label className="flex items-center gap-2 text-sm text-slate-600">
@@ -91,7 +91,7 @@ export default function QuestionPapers() {
                     checked={showKeys}
                     onChange={(e) => setShowKeys(e.target.checked)}
                   />
-                  Show answer keys
+                  Show reviewer guidance
                 </label>
               </div>
 
@@ -108,7 +108,6 @@ export default function QuestionPapers() {
                     >
                       {q.question_type === 'OBJECTIVE' ? 'Objective' : 'Subjective'}
                     </span>
-                    <span className="badge bg-slate-100 text-slate-700">{q.marks} marks</span>
                   </div>
 
                   <p className="mt-3 whitespace-pre-wrap text-sm font-medium text-slate-900">
@@ -142,7 +141,7 @@ export default function QuestionPapers() {
                   {q.question_type === 'SUBJECTIVE' && showKeys && q.evaluation_criteria && (
                     <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
                       <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
-                        Evaluation criteria
+                        What to look for
                       </p>
                       <p className="mt-1.5 whitespace-pre-wrap text-xs text-amber-900">
                         {q.evaluation_criteria}
@@ -159,12 +158,7 @@ export default function QuestionPapers() {
       <div className="card p-5 text-sm text-slate-600">
         <h3 className="font-semibold text-slate-900">Updating questions</h3>
         <p className="mt-2">
-          Papers are seeded from JSON files in <code className="rounded bg-slate-100 px-1.5 py-0.5">backend/question_bank/</code>.
-          Edit a file and restart the backend to seed a role that has no paper yet. To change an
-          existing role's questions without affecting assessments already sent out, create a new
-          version via <code className="rounded bg-slate-100 px-1.5 py-0.5">POST /api/admin/question-papers</code> and add
-          questions with <code className="rounded bg-slate-100 px-1.5 py-0.5">POST /api/admin/questions</code>; existing
-          assessments stay pinned to their original version.
+          Each form is seeded from a JSON file in <code className="rounded bg-slate-100 px-1.5 py-0.5">backend/question_bank/</code>, transcribed from the official Valamm.AI screening documents. Edit a file and restart the backend: the paper is updated in place if no assessment has been issued against it, otherwise a new version is published and existing assessments stay pinned to the version they were created with.
         </p>
       </div>
     </div>

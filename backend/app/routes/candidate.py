@@ -37,6 +37,7 @@ def _guard(request: Request, token: str) -> None:
 def get_assessment(token: str, request: Request, db: Session = Depends(get_db)) -> CandidateAssessmentOut:
     _guard(request, token)
     assessment = resolve_assessment(db, token)
+    assessment_service.close_if_expired(db, assessment)
     resume = resume_service.current_resume(db, assessment.id)
     return CandidateAssessmentOut(
         candidate_name=assessment.candidate_name,
@@ -67,6 +68,8 @@ def get_assessment(token: str, request: Request, db: Session = Depends(get_db)) 
         resume_confirmed_at=assessment.resume_confirmed_at,
         interest_response=assessment.interest_response,
         interest_responded_at=assessment.interest_responded_at,
+        expires_at=assessment_service.expires_at(assessment),
+        seconds_remaining=assessment_service.seconds_remaining(assessment),
     )
 
 
@@ -76,7 +79,7 @@ def start(token: str, request: Request, db: Session = Depends(get_db)) -> Candid
     assessment = resolve_assessment(db, token)
     if assessment.status == AssessmentStatus.SUBMITTED:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="This assessment has already been submitted."
+            status_code=status.HTTP_409_CONFLICT, detail="You have already sent us your answers."
         )
     assessment = assessment_service.start_assessment(db, assessment)
     return get_assessment(token, request, db)
@@ -100,9 +103,14 @@ def declare_interest(
 def questions(token: str, request: Request, db: Session = Depends(get_db)) -> CandidateQuestionsOut:
     _guard(request, token)
     assessment = resolve_assessment(db, token)
+    if assessment_service.close_if_expired(db, assessment):
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="Your time has run out. Your answers have been sent to us as they were.",
+        )
     if assessment.status == AssessmentStatus.SUBMITTED:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="This assessment has already been submitted."
+            status_code=status.HTTP_409_CONFLICT, detail="You have already sent us your answers."
         )
     assessment_service.require_resume(db, assessment)
 
@@ -144,6 +152,8 @@ def questions(token: str, request: Request, db: Session = Depends(get_db)) -> Ca
         status=assessment.status,
         duration_minutes=assessment.duration_minutes,
         started_at=assessment.started_at,
+        expires_at=assessment_service.expires_at(assessment),
+        seconds_remaining=assessment_service.seconds_remaining(assessment),
         questions=out,
     )
 
@@ -176,11 +186,27 @@ def save_answer(
 def submit(token: str, request: Request, db: Session = Depends(get_db)) -> SubmitOut:
     _guard(request, token)
     assessment = resolve_assessment(db, token)
+
+    # If the clock ran out first, close it and report that rather than erroring.
+    if assessment_service.close_if_expired(db, assessment):
+        answered, total = assessment_service.answer_counts(db, assessment)
+        return SubmitOut(
+            status=assessment.status,
+            submitted_at=assessment.submitted_at,
+            message=(
+                "Your time has run out, so your answers have been sent to us as they were. "
+                "Thank you for your time."
+            ),
+            answered_count=answered,
+            total_questions=total,
+            auto_submitted=True,
+        )
+
     assessment, answered, total = assessment_service.submit_assessment(db, assessment)
     return SubmitOut(
         status=assessment.status,
         submitted_at=assessment.submitted_at,
-        message="Your assessment has been submitted successfully. Thank you for your time.",
+        message="Thank you - your answers have been sent to our recruitment team.",
         answered_count=answered,
         total_questions=total,
     )

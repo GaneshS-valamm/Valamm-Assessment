@@ -3,6 +3,7 @@ import type {
   CandidateResume,
   ResumeDetail,
   ResumeList,
+  ResumePreview,
   ResumeRow,
   ResumeStatus,
   AssessmentResult,
@@ -137,6 +138,9 @@ export const adminApi = {
 
   resume: (id: number) => authed<ResumeDetail>(`/api/admin/resumes/${id}`),
 
+  /** Inline content so the panel can open a resume without downloading it. */
+  resumePreview: (id: number) => authed<ResumePreview>(`/api/admin/resumes/${id}/preview`),
+
   /** Admin attaches the resume they received, so the candidate can review it. */
   uploadResumeForAssessment: async (assessmentId: number, file: File): Promise<ResumeRow> => {
     const form = new FormData();
@@ -180,10 +184,11 @@ export const adminApi = {
     return URL.createObjectURL(blob);
   },
 
-  saveEvaluation: (assessmentId: number, questionId: number, awarded_marks: number, feedback: string) =>
+  /** Reviewer notes on one answer. These forms are not scored, so no marks are sent. */
+  saveReviewNotes: (assessmentId: number, questionId: number, feedback: string) =>
     authed<AssessmentResult>(`/api/admin/assessments/${assessmentId}/evaluations/${questionId}`, {
       method: 'PUT',
-      body: JSON.stringify({ awarded_marks, evaluator_feedback: feedback || null }),
+      body: JSON.stringify({ evaluator_feedback: feedback || null }),
     }),
 };
 
@@ -220,6 +225,9 @@ export const candidateApi = {
 
   confirmResume: (token: string) =>
     request<{ message: string }>(`/api/assessments/${token}/resume/confirm`, { method: 'POST' }),
+
+  resumePreview: (token: string) =>
+    request<ResumePreview>(`/api/assessments/${token}/resume/preview`),
 
   declareInterest: (token: string, interested: boolean) =>
     request<CandidateAssessment>(`/api/assessments/${token}/interest`, {

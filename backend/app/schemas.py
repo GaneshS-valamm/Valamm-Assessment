@@ -196,6 +196,9 @@ class AssessmentRowOut(BaseModel):
     interest_response: InterestResponse = InterestResponse.PENDING
     interest_responded_at: UtcDT | None = None
     resume_confirmed_at: UtcDT | None = None
+    expires_at: UtcDT | None = None
+    answered_count: int = 0
+    question_count: int = 0
 
 
 class AssessmentListOut(BaseModel):
@@ -315,6 +318,8 @@ class CandidateAssessmentOut(BaseModel):
     resume_confirmed_at: UtcDT | None = None
     interest_response: InterestResponse = InterestResponse.PENDING
     interest_responded_at: UtcDT | None = None
+    expires_at: UtcDT | None = None
+    seconds_remaining: int | None = None
 
 
 class CandidateQuestionsOut(BaseModel):
@@ -323,6 +328,8 @@ class CandidateQuestionsOut(BaseModel):
     status: AssessmentStatus
     duration_minutes: int | None
     started_at: UtcDT | None
+    expires_at: UtcDT | None = None
+    seconds_remaining: int | None = None
     questions: list[CandidateQuestionOut]
 
 
@@ -343,6 +350,8 @@ class SubmitOut(BaseModel):
     message: str
     answered_count: int
     total_questions: int
+    # True when the deadline closed the paper rather than the candidate submitting it.
+    auto_submitted: bool = False
 
 
 # --------------------------------------------------------------------------- #
@@ -378,6 +387,9 @@ class ResultQuestionOut(BaseModel):
 
 class ResultOut(BaseModel):
     assessment_id: int
+    duration_minutes: int | None = None
+    auto_submitted: bool = False
+    answered_count: int = 0
     candidate_name: str
     candidate_email: str
     role_name: str
@@ -400,8 +412,11 @@ class ResultOut(BaseModel):
 
 
 class EvaluationUpsert(BaseModel):
-    awarded_marks: float = Field(ge=0)
+    """Reviewer notes on one answer. These papers are screening forms, not scored tests,
+    so marks are not collected; the field remains optional for API compatibility."""
+
     evaluator_feedback: str | None = None
+    awarded_marks: float | None = Field(default=None, ge=0)
 
 
 class MessageOut(BaseModel):
@@ -410,3 +425,14 @@ class MessageOut(BaseModel):
 
 class InterestRequest(BaseModel):
     interested: bool
+
+
+class ResumePreviewOut(BaseModel):
+    """Inline preview so a reviewer never has to download the file."""
+
+    resume_id: int
+    original_filename: str
+    content_type: str
+    file_size: int
+    kind: str  # "pdf" | "text" | "unsupported"
+    text: str | None = None

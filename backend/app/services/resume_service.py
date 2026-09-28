@@ -118,7 +118,7 @@ def upload_resume(
     if assessment.status == AssessmentStatus.SUBMITTED:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="This assessment has been submitted. The submitted resume is locked and cannot be replaced.",
+            detail="Your answers have already been sent, so the resume on file can no longer be replaced.",
         )
 
     ext, normalised_type = validate_upload(filename, content_type, data)

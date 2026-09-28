@@ -5,7 +5,6 @@ import type { AssessmentRow, AssessmentStatus, Role } from '../types';
 import {
   Alert,
   CopyButton,
-  EvaluationBadge,
   InterestBadge,
   Spinner,
   StatusBadge,
@@ -162,9 +161,7 @@ export default function Candidates() {
                   <th className="th">Created Date</th>
                   <th className="th">Status</th>
                   <th className="th">Submission Date</th>
-                  <th className="th">Objective Score</th>
-                  <th className="th">Subjective Evaluation</th>
-                  <th className="th">Result</th>
+                  <th className="th">Answers</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -201,31 +198,16 @@ export default function Candidates() {
                       <StatusBadge status={r.status as AssessmentStatus} />
                     </td>
                     <td className="td whitespace-nowrap text-xs">{formatDateTime(r.submitted_at)}</td>
-                    <td className="td whitespace-nowrap">
-                      {r.status !== 'SUBMITTED' ? (
-                        <span className="text-slate-400">—</span>
-                      ) : r.objective_max === 0 ? (
-                        <span className="text-xs text-slate-500">n/a</span>
-                      ) : (
-                        <span className="font-semibold text-slate-900">
-                          {r.objective_score ?? 0} / {r.objective_max}
-                        </span>
-                      )}
-                    </td>
                     <td className="td">
-                      {r.status === 'SUBMITTED' ? (
-                        <EvaluationBadge status={r.evaluation_status} />
-                      ) : (
-                        <span className="text-slate-400">—</span>
-                      )}
-                    </td>
-                    <td className="td">
-                      {r.status === 'SUBMITTED' ? (
+                      {r.answered_count > 0 ? (
                         <Link to={`/admin/results/${r.id}`} className="btn-primary !px-3 !py-1.5 !text-xs">
-                          View Result
+                          View Answers
+                          <span className="ml-1 font-normal opacity-80">
+                            ({r.answered_count}/{r.question_count})
+                          </span>
                         </Link>
                       ) : (
-                        <span className="text-xs text-slate-400">Not submitted</span>
+                        <span className="text-xs text-slate-400">No answers yet</span>
                       )}
                     </td>
                   </tr>

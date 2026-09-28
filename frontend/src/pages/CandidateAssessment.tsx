@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { candidateApi, formatFileSize } from '../services/api';
+import { ApiError, candidateApi, formatFileSize } from '../services/api';
 import type {
   CandidateAssessment as CandidateMeta,
   CandidateQuestion,
   CandidateResume,
   InterestResponse,
+  ResumePreview,
 } from '../types';
 import { Alert, Modal, Spinner } from '../components/ui';
 
@@ -25,6 +26,9 @@ export default function CandidateAssessment() {
   const [confirming, setConfirming] = useState(false);
   const [submitMsg, setSubmitMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [deadline, setDeadline] = useState<number | null>(null);
+  const [remaining, setRemaining] = useState<number | null>(null);
+  const [timeUp, setTimeUp] = useState(false);
 
   /* ----------------------------- bootstrap ----------------------------- */
   useEffect(() => {
@@ -43,13 +47,14 @@ export default function CandidateAssessment() {
           const q = await candidateApi.questions(token);
           if (!alive) return;
           setQuestions(q.questions);
+          applyDeadline(q.seconds_remaining);
           setPhase('exam');
         } else {
           setPhase('welcome');
         }
       } catch (err) {
         if (!alive) return;
-        setError(err instanceof Error ? err.message : 'This assessment link is not valid.');
+        setError(err instanceof Error ? err.message : 'This link is not valid.');
         setPhase('error');
       }
     })();
@@ -65,11 +70,12 @@ export default function CandidateAssessment() {
       setMeta(m);
       const q = await candidateApi.questions(token);
       setQuestions(q.questions);
+      applyDeadline(q.seconds_remaining);
       setIndex(0);
       setPhase('exam');
     } catch (err) {
       // A missing resume is recoverable - keep the candidate on the welcome page.
-      setError(err instanceof Error ? err.message : 'Could not start the assessment.');
+      setError(err instanceof Error ? err.message : 'Could not open the questions.');
     }
   }
 
@@ -95,6 +101,51 @@ export default function CandidateAssessment() {
     }
   }
 
+  /* ------------------------------ countdown ---------------------------- */
+
+  // The server is the authority on time; it sends the seconds left and closes the paper
+  // itself if the deadline passes. This turns that into a local ticking clock.
+  function applyDeadline(secondsLeft: number | null | undefined) {
+    if (secondsLeft === null || secondsLeft === undefined) {
+      setDeadline(null);
+      setRemaining(null);
+      return;
+    }
+    setDeadline(Date.now() + secondsLeft * 1000);
+    setRemaining(secondsLeft);
+  }
+
+  useEffect(() => {
+    if (deadline === null || phase !== 'exam') return;
+    const tick = () => {
+      const left = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+      setRemaining(left);
+      if (left === 0) setTimeUp(true);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [deadline, phase]);
+
+  // When the clock hits zero the paper closes itself - no further answers are accepted.
+  useEffect(() => {
+    if (!timeUp || phase !== 'exam') return;
+    void (async () => {
+      Object.values(timers.current).forEach(clearTimeout);
+      try {
+        const res = await candidateApi.submit(token);
+        setSubmitMsg(res.message);
+      } catch {
+        setSubmitMsg(
+          'Your time has run out, so your answers have been sent to us as they were. Thank you for your time.',
+        );
+      }
+      setConfirming(false);
+      setMeta((m) => (m ? { ...m, status: 'SUBMITTED' } : m));
+      setPhase('submitted');
+    })();
+  }, [timeUp, phase, token]);
+
   /* -------------------------- backend autosave ------------------------- */
   const timers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
 
@@ -109,6 +160,11 @@ export default function CandidateAssessment() {
         await candidateApi.saveAnswer(token, questionId, payload);
         setSaveState('saved');
       } catch (err) {
+        // The server closed the paper because time ran out - stop retrying.
+        if (err instanceof ApiError && err.status === 410) {
+          setTimeUp(true);
+          return;
+        }
         // Retry transient failures (network drop) with a short backoff.
         if (attempt < 4) {
           setTimeout(() => void persist(questionId, payload, attempt + 1), attempt * 1200);
@@ -176,7 +232,7 @@ export default function CandidateAssessment() {
       setPhase('submitted');
       setMeta((m) => (m ? { ...m, status: 'SUBMITTED', submitted_at: res.submitted_at } : m));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Submission failed.');
+      setError(err instanceof Error ? err.message : 'Could not send your answers.');
       setConfirming(false);
       if (err instanceof Error && err.message.includes('already been submitted')) {
         setPhase('submitted');
@@ -188,7 +244,7 @@ export default function CandidateAssessment() {
 
   /* ------------------------------- render ------------------------------ */
 
-  if (phase === 'loading') return <Shell><Spinner label="Validating your assessment link…" /></Shell>;
+  if (phase === 'loading') return <Shell><Spinner label="Checking your link…" /></Shell>;
 
   if (phase === 'error')
     return (
@@ -197,7 +253,7 @@ export default function CandidateAssessment() {
           <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-rose-100 text-xl text-rose-600">
             !
           </div>
-          <h1 className="text-xl font-bold text-slate-900">Assessment unavailable</h1>
+          <h1 className="text-xl font-bold text-slate-900">This link is unavailable</h1>
           <p className="mt-2 text-sm text-slate-600">{error}</p>
           <p className="mt-4 text-xs text-slate-500">
             Please contact the recruitment team for a new link.
@@ -215,8 +271,8 @@ export default function CandidateAssessment() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Thank you for your response</h1>
           <p className="mt-3 text-slate-600">
-            We have recorded that you would prefer not to proceed with this role at the moment. No
-            assessment is required and there is nothing further for you to do.
+            We have noted that you would prefer not to go ahead with this role at the moment.
+            There is nothing further for you to do.
           </p>
           <p className="mt-4 text-sm text-slate-500">
             We appreciate you taking the time to let us know, {meta?.candidate_name}.
@@ -250,9 +306,11 @@ export default function CandidateAssessment() {
           <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-emerald-100 text-2xl text-emerald-600">
             ✓
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Assessment Submitted</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {timeUp ? 'Time Is Up' : 'Thank You'}
+          </h1>
           <p className="mt-3 text-slate-600">
-            {submitMsg || 'Your assessment has been submitted successfully. Thank you for your time.'}
+            {submitMsg || 'Thank you - your answers have been sent to our recruitment team.'}
           </p>
           <dl className="mt-6 space-y-2 border-t border-slate-200 pt-6 text-left text-sm">
             <div className="flex justify-between gap-4">
@@ -269,7 +327,7 @@ export default function CandidateAssessment() {
             </div>
             {meta?.submitted_at && (
               <div className="flex justify-between gap-4">
-                <dt className="text-slate-500">Submitted at</dt>
+                <dt className="text-slate-500">Sent at</dt>
                 <dd className="font-medium text-slate-900">
                   {new Date(meta.submitted_at).toLocaleString()}
                 </dd>
@@ -286,8 +344,8 @@ export default function CandidateAssessment() {
             )}
           </dl>
           <p className="mt-6 text-xs text-slate-500">
-            Your responses are recorded and are now with the recruitment team. This link can no
-            longer be used to change your answers.
+            Your answers are now with our recruitment team. This link can no longer be used to
+            change them.
           </p>
         </div>
       </Shell>
@@ -299,8 +357,21 @@ export default function CandidateAssessment() {
         <div className="card mx-auto max-w-2xl p-8">
           <h1 className="text-2xl font-bold text-slate-900">Hi, {meta.candidate_name}!</h1>
           <p className="mt-2 text-slate-600">
-            Welcome to your recruitment assessment. Please read the instructions before you begin.
+            Thanks for your interest in joining us. Below are a few questions from our recruitment
+            team - please read the note before you begin.
           </p>
+
+          <div className="mt-5 rounded-xl border border-brand-200 bg-brand-50 p-5">
+            <p className="text-sm font-semibold text-brand-900">
+              This is not a test, and there are no right or wrong answers.
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-brand-900">
+              We just want an idea of how you think and how you approach your work. Please write the
+              answers yourself, in your own words &mdash; <strong>please don't use AI tools to
+              generate them</strong>. A short, honest answer in plain language tells us far more than
+              a polished one, so write the way you would explain something to a colleague.
+            </p>
+          </div>
 
           <dl className="mt-6 grid gap-4 rounded-xl border border-slate-200 bg-slate-50 p-5 sm:grid-cols-2">
             <Field label="Candidate Name" value={meta.candidate_name} />
@@ -308,8 +379,12 @@ export default function CandidateAssessment() {
             <Field label="Assigned Role" value={meta.role_name} />
             <Field label="Number of Questions" value={String(meta.question_count)} />
             <Field
-              label="Duration"
-              value={meta.duration_minutes ? `${meta.duration_minutes} minutes (guideline)` : 'Not timed'}
+              label="Time Limit"
+              value={
+                meta.duration_minutes
+                  ? `${meta.duration_minutes} minutes`
+                  : 'Not timed'
+              }
             />
           </dl>
 
@@ -335,7 +410,7 @@ export default function CandidateAssessment() {
           />
 
           <div className="mt-6">
-            <h2 className="text-sm font-semibold text-slate-900">Instructions</h2>
+            <h2 className="text-sm font-semibold text-slate-900">Before you start</h2>
             <ul className="mt-2 space-y-2 text-sm text-slate-600">
               {meta.instructions.map((line) => (
                 <li key={line} className="flex gap-2">
@@ -357,13 +432,13 @@ export default function CandidateAssessment() {
             className="btn-primary mt-8 w-full sm:w-auto"
             disabled={meta.interest_response !== 'INTERESTED'}
           >
-            Start Assessment
+            Start
           </button>
           {meta.interest_response !== 'INTERESTED' && (
             <p className="mt-2 text-xs text-slate-500">
               {meta.resume_confirmed_at === null
-                ? 'Review the resume above first, then confirm your interest in the role.'
-                : 'Confirm your interest in the role to begin.'}
+                ? 'Review the resume above first, then let us know about the role.'
+                : 'Let us know about the role to begin.'}
             </p>
           )}
         </div>
@@ -382,11 +457,12 @@ export default function CandidateAssessment() {
             <p className="text-sm font-semibold text-slate-900">{meta?.candidate_name}</p>
             <p className="text-xs text-slate-500">{meta?.role_name}</p>
           </div>
-          <div className="flex items-center gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-3 text-xs">
             <SaveIndicator state={saveState} />
             <span className="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-700">
               {answered} / {questions.length} answered
             </span>
+            {remaining !== null && <Countdown seconds={remaining} />}
           </div>
         </div>
 
@@ -439,7 +515,7 @@ export default function CandidateAssessment() {
               onClick={() => setConfirming(true)}
               className="btn-primary mt-4 w-full !bg-emerald-600 hover:!bg-emerald-700"
             >
-              Submit Assessment
+              Send My Answers
             </button>
           </div>
 
@@ -457,9 +533,8 @@ export default function CandidateAssessment() {
                       : 'bg-violet-100 text-violet-800'
                   }`}
                 >
-                  {q.question_type === 'OBJECTIVE' ? 'Multiple choice' : 'Written answer'}
+                  In your own words
                 </span>
-                <span className="badge bg-slate-100 text-slate-700">{q.marks} marks</span>
               </div>
 
               <p className="mt-4 whitespace-pre-wrap text-base font-medium leading-relaxed text-slate-900">
@@ -538,7 +613,7 @@ export default function CandidateAssessment() {
                     className="btn-primary !bg-emerald-600 hover:!bg-emerald-700"
                     onClick={() => setConfirming(true)}
                   >
-                    Review & Submit
+                    Review &amp; Send
                   </button>
                 )}
               </div>
@@ -549,19 +624,19 @@ export default function CandidateAssessment() {
 
       {confirming && (
         <Modal
-          title="Submit your assessment?"
+          title="Send your answers?"
           onClose={() => setConfirming(false)}
           footer={
             <>
               <button className="btn-secondary" onClick={() => setConfirming(false)} disabled={submitting}>
-                Keep working
+                Keep writing
               </button>
               <button
                 className="btn-primary !bg-emerald-600 hover:!bg-emerald-700"
                 onClick={submit}
                 disabled={submitting}
               >
-                {submitting ? 'Submitting…' : 'Confirm & Submit'}
+                {submitting ? 'Sending…' : 'Yes, send my answers'}
               </button>
             </>
           }
@@ -584,13 +659,34 @@ export default function CandidateAssessment() {
               </Alert>
             )}
             <p>
-              Submission is <strong>final</strong>. Once submitted you will not be able to change
-              your answers or reopen the paper.
+              This is <strong>final</strong>. Once sent, you will not be able to change your
+              answers or reopen this link.
             </p>
           </div>
         </Modal>
       )}
     </Shell>
+  );
+}
+
+function Countdown({ seconds }: { seconds: number }) {
+  const mm = Math.floor(seconds / 60);
+  const ss = seconds % 60;
+  const urgent = seconds <= 300; // last five minutes
+  const critical = seconds <= 60;
+  return (
+    <span
+      className={`rounded-full px-3 py-1 font-bold tabular-nums ${
+        critical
+          ? 'animate-pulse bg-rose-600 text-white'
+          : urgent
+            ? 'bg-amber-100 text-amber-900'
+            : 'bg-slate-900 text-white'
+      }`}
+      title="Time remaining"
+    >
+      {String(mm).padStart(2, '0')}:{String(ss).padStart(2, '0')} left
+    </span>
   );
 }
 
@@ -603,8 +699,8 @@ function Shell({ children }: { children: React.ReactNode }) {
             RA
           </span>
           <div className="leading-tight">
-            <p className="text-sm font-semibold text-slate-900">Recruitment Assessment</p>
-            <p className="text-xs text-slate-500">Candidate portal</p>
+            <p className="text-sm font-semibold text-slate-900">Valamm.AI Recruitment</p>
+            <p className="text-xs text-slate-500">A few questions from our team</p>
           </div>
         </div>
       </header>
@@ -633,28 +729,42 @@ function ResumeReview({
   const [err, setErr] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewErr, setPreviewErr] = useState('');
+  const [textPreview, setTextPreview] = useState<ResumePreview | null>(null);
 
   const isPdf = resume?.content_type === 'application/pdf';
 
   // Load the resume through the token-scoped endpoint so the candidate can actually read it.
   useEffect(() => {
-    if (!resume || !isPdf) {
+    if (!resume) {
       setPreviewUrl(null);
+      setTextPreview(null);
       return;
     }
     let url: string | null = null;
     let alive = true;
     setPreviewErr('');
-    candidateApi
-      .resumeBlobUrl(token, 'inline')
-      .then((u) => {
-        url = u;
-        if (alive) setPreviewUrl(u);
-        else URL.revokeObjectURL(u);
-      })
-      .catch((e) =>
-        alive && setPreviewErr(e instanceof Error ? e.message : 'Preview unavailable.'),
-      );
+
+    if (isPdf) {
+      candidateApi
+        .resumeBlobUrl(token, 'inline')
+        .then((u) => {
+          url = u;
+          if (alive) setPreviewUrl(u);
+          else URL.revokeObjectURL(u);
+        })
+        .catch((e) =>
+          alive && setPreviewErr(e instanceof Error ? e.message : 'Preview unavailable.'),
+        );
+    } else {
+      // Word files are rendered as text by the backend so they can be read here.
+      candidateApi
+        .resumePreview(token)
+        .then((pv) => alive && setTextPreview(pv))
+        .catch((e) =>
+          alive && setPreviewErr(e instanceof Error ? e.message : 'Preview unavailable.'),
+        );
+    }
+
     return () => {
       alive = false;
       if (url) URL.revokeObjectURL(url);
@@ -781,10 +891,18 @@ function ResumeReview({
             ) : (
               <p className="mt-3 text-sm text-slate-500">Loading preview\u2026</p>
             )
+          ) : textPreview === null ? (
+            <p className="mt-3 text-sm text-slate-500">Opening your resume&hellip;</p>
+          ) : textPreview.kind === 'text' && textPreview.text ? (
+            <div className="mt-3 max-h-[420px] overflow-auto rounded-lg border border-slate-200 bg-white p-4">
+              <pre className="whitespace-pre-wrap break-words font-sans text-sm leading-relaxed text-slate-800">
+                {textPreview.text}
+              </pre>
+            </div>
           ) : (
             <p className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-              DOCX files cannot be previewed in the browser. Use <strong>Download</strong> to open
-              it and check the contents.
+              This file could not be shown here. Use <strong>Download</strong> to open it and check
+              the contents.
             </p>
           )}
 
@@ -813,7 +931,7 @@ function ResumeReview({
           </div>
           {confirmed && !resume.is_locked && (
             <p className="mt-2 text-xs text-slate-500">
-              You can still upload a newer version until you submit the assessment.
+              You can still upload a newer version until you send your answers.
             </p>
           )}
         </>
@@ -871,7 +989,7 @@ function InterestGate({
 
       <p className="mt-1.5 text-sm text-slate-600">
         Would you like to go ahead with the <strong className="text-slate-900">{roleName}</strong>{' '}
-        role and take the assessment?
+        role and answer a few questions from our team?
       </p>
 
       {!enabled ? (
@@ -880,7 +998,7 @@ function InterestGate({
         </p>
       ) : response === 'INTERESTED' ? (
         <p className="mt-3 text-sm font-semibold text-emerald-700">
-          &#10003; Thank you &mdash; you can start the assessment below.
+          &#10003; Thank you &mdash; you can begin below.
         </p>
       ) : (
         <div className="mt-4 flex flex-wrap gap-3">
@@ -919,8 +1037,8 @@ function InterestGate({
           }
         >
           <p>
-            If you choose <strong>No</strong>, the assessment will be closed and you will not be
-            able to take it. This cannot be undone from this link.
+            If you choose <strong>No</strong>, these questions will close and you will not be able
+            to answer them. This cannot be undone from this link.
           </p>
         </Modal>
       )}

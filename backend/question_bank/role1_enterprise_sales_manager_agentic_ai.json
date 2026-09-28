@@ -1,91 +1,111 @@
 {
   "role_name": "Enterprise Sales Manager – Agentic AI Solutions",
-  "role_description": "Owns enterprise B2B pursuit and closure of Agentic AI platform deals, from consultative discovery through commercial negotiation and multi-stakeholder closure.",
-  "paper_title": "Enterprise Sales Manager – Agentic AI Solutions | Assessment Paper",
+  "role_description": "Owns full-cycle enterprise pursuit and closure of Agentic AI solutions. Bengaluru, work-from-office.",
+  "paper_title": "Candidate Screening Form – Enterprise Sales Manager, Agentic AI Solutions",
+  "paper_notes": "Transcribed verbatim from Enterprise_Sales_Manager_Candidate_Screening_Form.docx. All questions are free-text. Marks are not used - this is a screening form, reviewed by a human, not a scored test.",
   "questions": [
     {
       "question_order": 1,
-      "question_type": "OBJECTIVE",
-      "marks": 5,
-      "question_text": "A CIO evaluating an Agentic AI deployment says: \"We already bought a chatbot last year and it delivered nothing.\" Which response best reflects consultative enterprise selling?",
-      "options": [
-        "Explain that our agent architecture is technically superior to the chatbot they purchased.",
-        "Ask what business outcome the chatbot was bought to deliver, how success was measured, and where the process actually broke down.",
-        "Offer an immediate 25% discount to offset their previous failed investment.",
-        "Move the conversation to a different department that has not had a bad experience."
-      ],
-      "correct_option_order": 2
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Where are you based these days?",
+      "evaluation_criteria": "Informational. Note whether the location is compatible with daily attendance at the Bengaluru office, and flag any relocation requirement."
     },
     {
       "question_order": 2,
-      "question_type": "OBJECTIVE",
-      "marks": 5,
-      "question_text": "Which characteristic most clearly distinguishes an agentic AI solution from a traditional rules-based automation or a single-turn LLM assistant in an enterprise workflow?",
-      "options": [
-        "It produces text responses with a larger context window.",
-        "It plans multi-step work, invokes tools or systems, and acts toward a goal with defined autonomy and guardrails.",
-        "It is always deployed on the customer's own GPU hardware.",
-        "It removes the need for any human review or audit trail."
-      ],
-      "correct_option_order": 2
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "This role is based in Bengaluru and is a work-from-office (WFO) position. Are you comfortable with this, and would you be able to work from our Bengaluru office on a daily basis?",
+      "evaluation_criteria": "Screening gate. Look for an unambiguous yes. Treat a clear no, or a hybrid-only expectation, as a knock-out for this role and flag it regardless of the rest of the form."
     },
     {
       "question_order": 3,
-      "question_type": "OBJECTIVE",
-      "marks": 5,
-      "question_text": "A $900K Agentic AI deal is forecast to close this quarter. The economic buyer has verbally agreed, but Procurement has not received the paperwork and Security review has not started. What is the most accurate forecast treatment?",
-      "options": [
-        "Keep it as Commit, because the economic buyer already said yes.",
-        "Move it to Best Case / Upside and drive a mutual action plan with dated Security and Procurement milestones.",
-        "Remove it from the forecast entirely until the contract is signed.",
-        "Split the deal into three smaller purchase orders to bypass Procurement thresholds."
-      ],
-      "correct_option_order": 2
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "What is your educational background? If you don't have a CS / engineering degree, how have you built your technical depth?",
+      "evaluation_criteria": "A CS or engineering degree is not mandatory for this role. Where it is absent, look for a credible substitute: certifications, self-study, time spent with technical products, or the ability to hold a technical conversation evidenced elsewhere in the form (see questions 8 and 10)."
     },
     {
       "question_order": 4,
-      "question_type": "OBJECTIVE",
-      "marks": 5,
-      "question_text": "During negotiation, an enterprise customer demands a 30% discount to sign by quarter-end. Which approach best protects both deal value and the customer relationship?",
-      "options": [
-        "Grant the discount immediately to secure the quarter.",
-        "Refuse any movement on price and restate the list price.",
-        "Trade the concession for value: multi-year term, expanded scope, upfront payment, or reference-ability in exchange for a smaller discount.",
-        "Escalate over the buyer's head to their CFO to complain about the request."
-      ],
-      "correct_option_order": 3
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "How many years of full-cycle enterprise sales experience do you have selling complex technology to mid to large enterprises?",
+      "evaluation_criteria": "Look for full-cycle ownership (prospect to close), not just one stage. Check the figure is consistent with the deal stories given later. Enterprise and mid-market experience counts; pure SMB or channel-only experience is weaker for this role."
     },
     {
       "question_order": 5,
       "question_type": "SUBJECTIVE",
-      "marks": 20,
-      "question_text": "A global logistics enterprise (12,000 employees) is evaluating an Agentic AI solution to automate exception handling in their freight operations. You have a 45-minute first discovery call with the VP of Operations and a Director of IT. Write the discovery plan you would run: the specific questions you would ask, what you are trying to learn from each, and how you would qualify whether this is a real opportunity.",
-      "instructions": "Write 250-400 words. Structure your answer clearly. Include actual questions you would ask, not just topic headings.",
-      "evaluation_criteria": "Strong answers: (1) open with current-state process and quantified pain (volume of exceptions, cost, cycle time, headcount); (2) probe business impact and a metric the VP is measured on; (3) identify decision process, budget ownership, economic buyer and timeline; (4) surface technical/data realities — source systems, integration, data access, security review; (5) qualify explicitly (compelling event, funding, champion) and state disqualification signals; (6) questions are open-ended and outcome-led rather than feature-led. Deduct for generic scripts, feature pitching, or no qualification criteria."
+      "marks": 1,
+      "question_text": "How would you define your current role, and how do you see yourself fitting into this Enterprise Sales Manager position at Valamm.AI?",
+      "evaluation_criteria": "Two parts, both needed: an accurate description of what they do today, and a considered link to this role showing they have read what it involves. Credit realistic self-assessment including gaps. Deduct for generic ambition statements that would fit any advert."
     },
     {
       "question_order": 6,
       "question_type": "SUBJECTIVE",
-      "marks": 20,
-      "question_text": "The same logistics customer's Head of Data Security blocks the deal: \"We cannot allow an autonomous agent to take actions inside our TMS, and we are not comfortable with our shipment data leaving our environment.\" The VP of Operations still wants the project. Describe exactly how you would handle this objection and move the deal forward.",
-      "instructions": "Write 250-400 words. Be specific about what you would say, who you would involve, and what you would propose commercially and technically.",
-      "evaluation_criteria": "Strong answers: (1) treat the objection as legitimate and seek to understand the specific risk rather than rebutting; (2) separate the two concerns (autonomy of action vs. data residency) and address each; (3) propose concrete mitigations — human-in-the-loop approval, scoped read-only first phase, least-privilege service accounts, audit logging, private/VPC or in-tenant deployment, DPA, no-training-on-customer-data commitments; (4) bring the right internal resources (solutions architect, security/compliance lead) and offer artefacts (SOC 2, architecture review, pen-test summary); (5) propose a bounded paid pilot or POC with success criteria that de-risks the decision; (6) keep the champion engaged and convert Security into a stakeholder rather than a gatekeeper. Deduct for dismissing the concern, over-promising, or relying only on discounting."
+      "marks": 1,
+      "question_text": "Did you carry a quota? What were your targets over the last two years, how did you perform against them, and what was your largest deal size?",
+      "evaluation_criteria": "Look for real figures: quota value, attainment percentage per year, and largest single deal. Credit candidates who know their own numbers without prompting and whose figures are consistent across two years. Treat 'always exceeded target' with no numbers as a weak answer."
     },
     {
       "question_order": 7,
       "question_type": "SUBJECTIVE",
-      "marks": 20,
-      "question_text": "Map the stakeholders you would expect in a $1M+ Agentic AI purchase at a large enterprise. For each stakeholder, state what they care about, what could make them block the deal, and the single most effective way to win their support.",
-      "instructions": "Write 250-400 words. Cover at least five distinct stakeholder types.",
-      "evaluation_criteria": "Strong answers identify economic buyer (CFO/COO/CIO — ROI, payback, business case), champion/business owner (outcome, delivery risk), technical evaluator/architect (integration, scalability, model behaviour), security & compliance (data handling, autonomy risk, regulation), procurement/legal (terms, liability, price benchmarking), end users/line managers (job impact, change management, trust in agent decisions), and where relevant an AI governance or risk committee. Credit for naming blocking risk per stakeholder, tailoring value per persona, and an explicit plan to build a multi-threaded relationship rather than single-threading through one contact. Deduct for a flat list with no motivations or no blocking risks."
+      "marks": 1,
+      "question_text": "How do you build your own pipeline when no leads are handed to you? Describe your prospecting and qualification approach with a real example.",
+      "instructions": "Please use a real example.",
+      "evaluation_criteria": "Tests whether they can self-source. Look for a repeatable method: how accounts are chosen, the research and trigger used, channels and cadence, and an explicit qualification bar. The example should be specific and recent. Deduct where pipeline has only ever arrived from marketing or inbound."
     },
     {
       "question_order": 8,
       "question_type": "SUBJECTIVE",
-      "marks": 20,
-      "question_text": "Outline the executive proposal you would submit to close this logistics deal. Describe the sections you would include and what you would put in each — specifically how you would build and defend the ROI case, and how you would structure pricing and the close plan.",
-      "instructions": "Write 250-400 words. Show the structure and the substance, not just headings.",
-      "evaluation_criteria": "Strong answers include: executive summary tied to the customer's own stated metric; current-state problem quantified with the customer's numbers; proposed solution and scope of agent autonomy; phased implementation plan with timeline and responsibilities; ROI model with stated assumptions, baseline, payback period and conservative case; commercial structure (term, licensing/consumption basis, ramp, pilot-to-production conversion); risks and mitigations; success criteria and governance; clear signature/close plan with dated mutual milestones. Credit for using the customer's language and validated data rather than vendor-supplied generic ROI, and for making assumptions explicit and defensible. Deduct for feature-led proposals, unvalidated ROI claims, or no close plan."
+      "marks": 1,
+      "question_text": "In simple words, what is an agentic AI solution? Give one example of where it adds value in an enterprise workflow, and one task it should not be trusted to run on its own.",
+      "instructions": "Please answer in plain, simple language and avoid jargon or buzzwords.",
+      "evaluation_criteria": "The key technical-comprehension question. A good answer conveys that an agent plans multi-step work, uses tools or systems, and acts toward a goal within guardrails - distinct from a chatbot or a fixed rules engine. The value example should be a concrete workflow. The 'should not be trusted' half matters most: it shows they understand autonomy risk and human-in-the-loop, which is what security and IT buyers will probe. Deduct for buzzword definitions or for claiming an agent can be trusted with anything."
+    },
+    {
+      "question_order": 9,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "What AWS or Azure exposure do you have?",
+      "instructions": "For example: a certification (current or lapsed), working with AWS / Microsoft partner companies, or hands-on / self-learning.",
+      "evaluation_criteria": "Nice to have rather than essential. Credit any genuine exposure - certification (even lapsed), co-selling with a cloud partner, marketplace experience, or self-directed hands-on learning. An honest 'limited, but here is what I have done' is better than an overstated claim."
+    },
+    {
+      "question_order": 10,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "A customer's IT or security team asks how an AI product will fit their existing systems, where their data will sit, and what access controls apply. How would you handle this conversation?",
+      "evaluation_criteria": "Tests behaviour in the conversation that most often stalls AI deals. Look for: treating the questions as legitimate rather than rebutting them, separating integration from data residency from access control, naming concrete mitigations (least privilege, human approval, audit logging, private or in-tenant deployment, no-training-on-customer-data, DPA, SOC 2), bringing in a solutions architect or security lead rather than bluffing, and converting security into a stakeholder. Deduct for dismissing the concern, over-promising, or answering only with reassurance."
+    },
+    {
+      "question_order": 11,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Walk us through one enterprise deal you closed – from first contact to close. Who was on the buying committee (business, IT, security, procurement), and who really made the decision?",
+      "evaluation_criteria": "Look for genuine multi-threading: several named stakeholder types, who championed it, who could block it, and a clear identification of the economic buyer as distinct from the loudest voice. Credit specifics on commercials, procurement and security review, and on how the deal was actually driven to signature. Deduct for a single-threaded story or one where the candidate cannot say who decided."
+    },
+    {
+      "question_order": 12,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Have you sold AI products or software into enterprises? Which industries do you know best?",
+      "instructions": "For example: BFSI, Manufacturing, Healthcare, Retail, IT, Education.",
+      "evaluation_criteria": "Look for concrete AI or software products sold, the buyer personas reached, and named industries with real depth rather than a list of every vertical. Sector knowledge relevant to our target market is a plus; honesty about where their depth genuinely lies is worth more than breadth claimed without evidence."
+    },
+    {
+      "question_order": 13,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Tell me about a recent deal you lost, and why.",
+      "instructions": "For example: lost to a competitor, pricing challenge, budget freeze, stuck in security review, or something else.",
+      "evaluation_criteria": "Tests candour and diagnosis. Look for a real, recent loss owned without deflection, an honest root cause, and a specific change made afterwards. Deduct for blaming product, pricing or the prospect entirely, for a trivial example, or for claiming no recent losses."
+    },
+    {
+      "question_order": 14,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "What is your current notice period, and what are your current and expected CTC (fixed + variable)?",
+      "evaluation_criteria": "Informational, for offer planning. Look for a clear notice period and both CTC figures with a fixed/variable split. Do not judge the candidate on the amounts; note only whether the expectation sits inside the approved band."
     }
   ]
 }

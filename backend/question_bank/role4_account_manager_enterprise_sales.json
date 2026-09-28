@@ -1,91 +1,119 @@
 {
   "role_name": "Account Manager – Enterprise Sales",
-  "role_description": "Owns retention, renewal and expansion of existing enterprise accounts through relationship depth, account planning and customer success coordination.",
-  "paper_title": "Account Manager – Enterprise Sales | Assessment Paper",
+  "role_description": "Owns enterprise account relationships, renewals, upsell and cross-sell for Cybersecurity, AI Security, Cloud and IAM solutions. Bengaluru, work-from-office, client travel as needed.",
+  "paper_title": "Candidate Screening Form – Account Manager, Enterprise Sales",
+  "paper_notes": "Transcribed verbatim from Account_Manager_Candidate_Screening_Form (3).docx, with one question added at position 12 as requested ('Have you sold AI products or software into enterprises? Which industries do you know best?'); the source document's questions 12-14 therefore shift to 13-15. All questions are free-text. Marks are not used - this is a screening form, reviewed by a human, not a scored test.",
   "questions": [
     {
       "question_order": 1,
-      "question_type": "OBJECTIVE",
-      "marks": 5,
-      "question_text": "Which signal is the strongest early indicator of renewal risk in an enterprise account?",
-      "options": [
-        "The customer's executive sponsor leaves and no new sponsor is engaged, while active usage declines quarter over quarter.",
-        "The customer submits a higher number of product support tickets than last quarter.",
-        "The customer asks for a product roadmap briefing.",
-        "The customer's procurement team requests an updated W-9 and vendor form."
-      ],
-      "correct_option_order": 1
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Where are you based these days?",
+      "evaluation_criteria": "Informational. Note whether the location is compatible with daily attendance at the Bengaluru office, and flag any relocation requirement."
     },
     {
       "question_order": 2,
-      "question_type": "OBJECTIVE",
-      "marks": 5,
-      "question_text": "An enterprise customer is 90 days from renewal and has only deployed the product in one of five planned business units. What should the Account Manager prioritise first?",
-      "options": [
-        "Immediately propose a five-business-unit expansion upsell to grow the contract.",
-        "Diagnose why adoption stalled in the other units, demonstrate realised value in the live unit, and build a joint plan before discussing commercials.",
-        "Offer a discount on renewal to keep the customer happy.",
-        "Wait for the customer to raise the issue during renewal negotiation."
-      ],
-      "correct_option_order": 2
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "This role is based in Bengaluru and is a work-from-office (WFO) position, with client travel as needed. Are you comfortable with this?",
+      "evaluation_criteria": "Screening gate covering two things: daily office attendance and willingness to travel to clients. Look for a clear yes to both. Flag any constraint on travel, since the role requires it."
     },
     {
       "question_order": 3,
-      "question_type": "OBJECTIVE",
-      "marks": 5,
-      "question_text": "What is the purpose of stakeholder mapping in an existing enterprise account?",
-      "options": [
-        "To record every employee's contact details for marketing campaigns.",
-        "To identify sponsors, champions, detractors, influencers and their relationships, so coverage and influence gaps can be closed before they become risks.",
-        "To determine which contact responds to email fastest.",
-        "To satisfy an internal CRM reporting requirement."
-      ],
-      "correct_option_order": 2
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "What is your educational background? Please mention your degree and specialization.",
+      "instructions": "This role requires an engineering degree (CS, IT, ECE or related).",
+      "evaluation_criteria": "Stated requirement for this role: an engineering degree in CS, IT, ECE or a related discipline. Record the degree and specialisation, and flag clearly if it is absent so the hiring manager can decide whether to waive it."
     },
     {
       "question_order": 4,
-      "question_type": "OBJECTIVE",
-      "marks": 5,
-      "question_text": "Which approach best distinguishes effective cross-selling in an enterprise account from a poorly timed upsell?",
-      "options": [
-        "Proposing every available module at the start of each quarter to maximise coverage.",
-        "Anchoring the recommendation to a business outcome the customer has already achieved or explicitly stated as a next priority.",
-        "Waiting until the renewal negotiation to introduce all additional products at once.",
-        "Offering additional products only when the customer's budget cycle opens, regardless of need."
-      ],
-      "correct_option_order": 2
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "How many years of enterprise B2B sales experience do you have, and how many of those were spent selling Cybersecurity, AI Security, Cloud or IAM solutions?",
+      "evaluation_criteria": "Two figures matter, and the second matters more: total enterprise B2B years, and years specifically in Cybersecurity, AI Security, Cloud or IAM. Check both against the products and deals described in questions 6, 7 and 10."
     },
     {
       "question_order": 5,
       "question_type": "SUBJECTIVE",
-      "marks": 20,
-      "question_text": "You inherit a $1.4M ARR enterprise account renewing in five months. Your predecessor left abruptly, the executive sponsor who signed the original deal has moved to a competitor, product usage is down 30% year over year, and a support escalation last quarter went badly. Write your 30/60/90-day plan for this account.",
-      "instructions": "Write 250-400 words. Be specific about actions, sequence and what success looks like at each checkpoint.",
-      "evaluation_criteria": "Strong answers: First 30 days — internal review (contract terms, usage data, support history, open escalations, CS/delivery input), rapid stakeholder outreach, listening-led meetings, explicit acknowledgement of the escalation with a remediation owner, and a rebuilt stakeholder map to find a new sponsor. Days 30-60 — root-cause the usage decline, agree a joint success plan with measurable adoption milestones, run an executive business review with realised value and a credible forward plan, identify and cultivate a new executive sponsor. Days 60-90 — de-risk the renewal (early commercial conversation, options, multi-year or restructured scope), escalate internally for support, document risk in the forecast honestly, and set up expansion only once value is re-established. Credit for candour about risk, internal alignment, measurable checkpoints, and prioritising trust repair before commercials. Deduct for leading with an upsell, discount-first thinking, or no root-cause work."
+      "marks": 1,
+      "question_text": "How would you define your current role, and how do you see yourself fitting into this Account Manager position at Valamm.AI?",
+      "evaluation_criteria": "Two parts, both needed: an accurate description of what they do today, and a considered link to this role. Look for an understanding that account management here means retention, renewal and expansion of existing enterprise relationships, not only new-logo hunting."
     },
     {
       "question_order": 6,
       "question_type": "SUBJECTIVE",
-      "marks": 20,
-      "question_text": "The same customer's new Head of Operations tells you their team is evaluating a competitor and \"needs to see a much stronger business case to justify renewing at this price.\" Describe how you would respond over the following weeks and how you would build that business case.",
-      "instructions": "Write 250-400 words. Include what data you would gather and how you would handle the competitive threat and the pricing pressure.",
-      "evaluation_criteria": "Strong answers: treat it as a real threat, ask what criteria the evaluation will be judged on and who is involved, and establish the decision timeline. Build the business case from customer-side evidence — usage and outcome data, time/cost saved, incidents avoided, integrations and process embedded, switching cost and migration risk, internal user testimony — quantified in the customer's own metrics. Handle competition by differentiating on validated outcomes and total cost rather than disparaging, and by exposing the gaps in the competitor's fit against the stated criteria. On price: understand the underlying driver (budget cut vs. perceived value gap), and trade concessions for term, scope, payment timing or reference rather than conceding unilaterally. Should include multi-threading beyond the new Head of Ops, an exec-to-exec touch, and internal alignment with CS/product/leadership. Deduct for immediate discounting, competitor bashing, or an unquantified business case."
+      "marks": 1,
+      "question_text": "Which Cybersecurity, AI Security, Cloud or IAM products have you sold, and to which Indian enterprises or industries?",
+      "instructions": "For example: SIEM, endpoint, IAM / PAM, cloud security, AWS / Azure / GCP; BFSI, manufacturing, IT/ITeS.",
+      "evaluation_criteria": "Look for named product categories actually sold and named industries or accounts in the Indian market. Depth in one or two relevant segments beats a list covering everything. Credit answers that make the claim checkable."
     },
     {
       "question_order": 7,
       "question_type": "SUBJECTIVE",
-      "marks": 20,
-      "question_text": "Write the account plan you would maintain for a strategic enterprise customer. Describe each section, how you would keep it current, and how you would identify and sequence expansion opportunities within it.",
-      "instructions": "Write 250-400 words. Show structure and substance, and be specific about the expansion logic.",
-      "evaluation_criteria": "Strong answers include: account overview and the customer's own business strategy/priorities; current footprint (products, business units, geographies, ARR, contract dates and terms); stakeholder map with sponsorship and coverage gaps; realised value and success metrics to date; open risks with owners and mitigation; whitespace analysis of units/use cases/products not yet sold; prioritised expansion plays with entry point, value hypothesis, likely stakeholders and timing tied to the customer's budget and initiative cycles; relationship and meeting cadence; competitive landscape in the account. Currency maintained via quarterly refresh, EBR outputs, usage-data review and CRM updates after every significant interaction. Credit for sequencing expansion behind demonstrated value and for tying plays to the customer's roadmap, not the vendor's quarter. Deduct for a static template with no risk view or no whitespace logic."
+      "marks": 1,
+      "question_text": "Pick one product you have sold. In simple words, explain how it works technically and what problem it solves for the customer.",
+      "instructions": "Please answer in plain, simple language and avoid jargon or buzzwords.",
+      "evaluation_criteria": "The technical-comprehension question. A good answer explains the mechanism in plain language - what the product actually does, where it sits in the customer's environment - and ties it to a concrete business problem. Deduct for a recited marketing pitch, for jargon substituting for understanding, or for an explanation that could not survive a question from a customer's engineer."
     },
     {
       "question_order": 8,
       "question_type": "SUBJECTIVE",
-      "marks": 20,
-      "question_text": "Describe how you would work with Customer Success, Support and Product to protect and grow a portfolio of enterprise accounts. Include how you divide responsibilities, your operating cadence, and how you handle a situation where a promised product capability slips by two quarters.",
-      "instructions": "Write 250-400 words. Be concrete about the cadence and about the slipped-commitment scenario.",
-      "evaluation_criteria": "Strong answers define clear boundaries — AM owns commercial relationship, renewal, expansion and executive alignment; CS owns adoption, onboarding and success plan execution; Support owns incident resolution; Product owns roadmap and feasibility — with shared ownership of the account health view. Cadence: weekly account syncs on at-risk accounts, joint success-plan reviews, escalation paths with defined severity and response expectations, quarterly EBRs, and a shared health scorecard combining usage, sentiment, support and commercial signals. For the slipped capability: get the facts and revised date from Product, notify the customer proactively rather than letting them discover it, apologise without over-committing, quantify the impact on their plan, offer interim workarounds or partner/professional-services options, revise the success plan and commercial expectations if the capability underpinned the purchase, and secure a Product commitment to a direct customer conversation. Credit for proactive transparency and internal advocacy. Deduct for concealing the slip, blaming internal teams to the customer, or making new unverified promises."
+      "marks": 1,
+      "question_text": "Have you sold to Global (non-Indian) enterprise accounts? Please describe briefly.",
+      "evaluation_criteria": "Nice to have. Credit named markets or accounts, time-zone coverage, and comfort with international enterprise buying processes. An honest no with relevant adjacent experience is acceptable."
+    },
+    {
+      "question_order": 9,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Describe how you defined an ICP (ideal customer profile) and built a target-account list for it. What outreach did you run against that list, and what were the results?",
+      "instructions": "For example: ABM, LinkedIn / social selling, email, partner-led or event-led outreach.",
+      "evaluation_criteria": "Tests method rather than activity. Look for explicit ICP criteria (industry, size, tech stack, trigger), how the list was built and prioritised, the channels and cadence run against it, and measurable results - meetings, pipeline, conversion. Deduct for a list handed to them by someone else, or outreach described with no outcome."
+    },
+    {
+      "question_order": 10,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Which CXO-level buyers (CEO, CISO, CTO, CIO) have you sold to directly? Walk us through one deal from first contact to closure – stakeholders, commercials, negotiation.",
+      "evaluation_criteria": "Highest-signal question on this form. Look for direct CXO access (particularly CISO for this product set) and a coherent end-to-end deal narrative: how first contact was made, the buying committee, the commercial structure, how negotiation and procurement were handled, and who actually decided. Deduct where CXO contact was only ever via a manager, or the story lacks commercials and negotiation detail."
+    },
+    {
+      "question_order": 11,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "What were your annual / quarterly revenue targets over the last two years, and how did you perform against them? What was your largest deal size?",
+      "evaluation_criteria": "Look for real figures across two years - quota, attainment, and largest single deal - and internal consistency with the deals described elsewhere. Credit candidates who know their own numbers without prompting. Treat unquantified claims of over-achievement as weak."
+    },
+    {
+      "question_order": 12,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Have you sold AI products or software into enterprises? Which industries do you know best?",
+      "instructions": "For example: BFSI, Manufacturing, Healthcare, Retail, IT, Education.",
+      "evaluation_criteria": "Look for concrete AI or software products sold, the buyer personas reached, and named industries with genuine depth rather than a list of every vertical. Honesty about where their depth actually lies is worth more than unevidenced breadth."
+    },
+    {
+      "question_order": 13,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Tell me about an account where you drove a renewal, upsell or cross-sell. What did you do?",
+      "evaluation_criteria": "Directly tests the core of this role. Look for a named account, the state it was in, what the candidate personally did to secure the renewal or expansion, how value was demonstrated, which stakeholders were involved, and the commercial outcome. Credit expansion earned off demonstrated value rather than a discount."
+    },
+    {
+      "question_order": 14,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "Tell me about a recent deal you lost, and why.",
+      "instructions": "For example: lost to a competitor, pricing challenge, budget freeze, or something else.",
+      "evaluation_criteria": "Tests candour and diagnosis. Look for a real, recent loss owned without deflection, an honest root cause, and a specific change made afterwards. Deduct for blaming product, pricing or the customer entirely, or for claiming no recent losses."
+    },
+    {
+      "question_order": 15,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "What is your current notice period, current CTC and expected CTC (fixed + variable)?",
+      "evaluation_criteria": "Informational, for offer planning. Look for the notice period and both CTC figures with a fixed/variable split. Do not judge the candidate on the amounts; note only whether the expectation sits inside the approved band."
     }
   ]
 }

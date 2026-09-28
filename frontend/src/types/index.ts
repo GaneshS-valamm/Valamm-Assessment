@@ -43,6 +43,9 @@ export interface AssessmentRow {
   interest_response: InterestResponse;
   interest_responded_at: string | null;
   resume_confirmed_at: string | null;
+  expires_at: string | null;
+  answered_count: number;
+  question_count: number;
 }
 
 export interface AssessmentList {
@@ -150,6 +153,8 @@ export interface CandidateAssessment {
   resume_confirmed_at: string | null;
   interest_response: InterestResponse;
   interest_responded_at: string | null;
+  expires_at: string | null;
+  seconds_remaining: number | null;
 }
 
 export interface CandidateQuestions {
@@ -158,6 +163,8 @@ export interface CandidateQuestions {
   status: AssessmentStatus;
   duration_minutes: number | null;
   started_at: string | null;
+  expires_at: string | null;
+  seconds_remaining: number | null;
   questions: CandidateQuestion[];
 }
 
@@ -167,6 +174,7 @@ export interface SubmitResult {
   message: string;
   answered_count: number;
   total_questions: number;
+  auto_submitted: boolean;
 }
 
 /* ------------------------------ results ------------------------------ */
@@ -201,6 +209,9 @@ export interface ResultQuestion {
 
 export interface AssessmentResult {
   assessment_id: number;
+  duration_minutes: number | null;
+  auto_submitted: boolean;
+  answered_count: number;
   candidate_name: string;
   candidate_email: string;
   role_name: string;
@@ -265,4 +276,13 @@ export interface ResumeDetail extends ResumeRow {
   objective_score: number | null;
   evaluation_status: EvaluationStatus;
   history: CandidateResume[];
+}
+
+export interface ResumePreview {
+  resume_id: number;
+  original_filename: string;
+  content_type: string;
+  file_size: number;
+  kind: 'pdf' | 'text' | 'unsupported';
+  text: string | null;
 }

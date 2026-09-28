@@ -60,12 +60,6 @@ def upsert_evaluation(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Subjective question not found in this candidate's paper.",
         )
-    if payload.awarded_marks > question.marks:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Awarded marks must be between 0 and {question.marks}.",
-        )
-
     try:
         evaluation = db.scalar(
             select(AssessmentEvaluation).where(
@@ -76,7 +70,8 @@ def upsert_evaluation(
         if evaluation is None:
             evaluation = AssessmentEvaluation(assessment_id=assessment.id, question_id=question.id)
             db.add(evaluation)
-        evaluation.awarded_marks = payload.awarded_marks
+        # Screening forms are not scored; marks stay at zero and the notes carry the review.
+        evaluation.awarded_marks = payload.awarded_marks or 0.0
         evaluation.maximum_marks = float(question.marks)
         evaluation.evaluator_feedback = payload.evaluator_feedback
         evaluation.evaluated_by = admin.id

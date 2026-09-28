@@ -1,7 +1,7 @@
 """Assessment lifecycle: generation, answer autosave, submission, results assembly."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
@@ -27,13 +27,14 @@ from ..security import decrypt_token, encrypt_token
 from .token_service import build_assessment_url, new_token_pair
 
 CANDIDATE_INSTRUCTIONS = [
+    "This is not a test and there are no right or wrong answers - we simply want to understand how you think and how you approach your work.",
+    "Please write your answers yourself, in your own words. Do not use AI tools to generate them - a genuine, plain answer tells us far more than a polished one.",
+    "Answer in plain, simple language and avoid jargon. Back up an answer with a real example wherever you can.",
     "Review the resume our recruitment team has on file for you, and replace it if it is out of date.",
-    "Confirm whether you would like to proceed with this role.",
-    "This assessment contains both multiple-choice and written (subjective) questions.",
-    "Answer every question. Multiple-choice questions accept exactly one option.",
-    "Your answers are saved automatically as you work - you can safely refresh or reopen the link.",
+    "Let us know whether you would like to go ahead with this role.",
+    "Your answers are saved automatically as you type - you can safely refresh or reopen the link.",
     "Use Previous / Next or the question panel to move between questions.",
-    "Click Submit Assessment when you are done. Submission is final and cannot be changed.",
+    "There is a time limit. When it runs out your answers are sent to us as they are.",
 ]
 
 
@@ -93,12 +94,56 @@ def create_assessment(
     return assessment, raw_token
 
 
+def expires_at(assessment: Assessment) -> datetime | None:
+    """When the candidate's time runs out, or None if the paper is untimed."""
+    if not assessment.duration_minutes or assessment.started_at is None:
+        return None
+    started = assessment.started_at
+    if started.tzinfo is None:
+        started = started.replace(tzinfo=timezone.utc)
+    return started + timedelta(minutes=assessment.duration_minutes)
+
+
+def seconds_remaining(assessment: Assessment) -> int | None:
+    deadline = expires_at(assessment)
+    if deadline is None:
+        return None
+    return max(0, int((deadline - utcnow()).total_seconds()))
+
+
+def is_expired(assessment: Assessment) -> bool:
+    if assessment.status == AssessmentStatus.SUBMITTED:
+        return False
+    deadline = expires_at(assessment)
+    return deadline is not None and utcnow() >= deadline
+
+
+def close_if_expired(db: Session, assessment: Assessment) -> bool:
+    """Auto-submit a paper whose time has run out.
+
+    Called on every candidate request, so the deadline is enforced server-side even if
+    the candidate closed the tab or tampered with the clock.
+    """
+    if not is_expired(assessment):
+        return False
+    try:
+        assessment.status = AssessmentStatus.SUBMITTED
+        assessment.submitted_at = expires_at(assessment) or utcnow()
+        resume_service.lock_resumes(db, assessment.id)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    db.refresh(assessment)
+    return True
+
+
 def require_resume(db: Session, assessment: Assessment) -> None:
     """The paper is released only after resume review and a positive interest response."""
     if assessment.interest_response == InterestResponse.NOT_INTERESTED:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You have declined to proceed with this role, so the assessment is closed.",
+            detail="You have let us know you would prefer not to proceed with this role, so these questions are closed.",
         )
 
     if not settings.RESUME_REQUIRED_BEFORE_START:
@@ -122,7 +167,7 @@ def require_resume(db: Session, assessment: Assessment) -> None:
     if assessment.interest_response == InterestResponse.PENDING:
         raise HTTPException(
             status_code=status.HTTP_412_PRECONDITION_FAILED,
-            detail="Please confirm whether you would like to proceed with this role.",
+            detail="Please let us know whether you would like to go ahead with this role.",
         )
 
 
@@ -136,7 +181,7 @@ def confirm_resume(db: Session, assessment: Assessment) -> Assessment:
     if assessment.status == AssessmentStatus.SUBMITTED:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="This assessment has already been submitted.",
+            detail="You have already sent us your answers.",
         )
     if assessment.resume_confirmed_at is None:
         assessment.resume_confirmed_at = utcnow()
@@ -150,7 +195,7 @@ def record_interest(db: Session, assessment: Assessment, interested: bool) -> As
     if assessment.status == AssessmentStatus.SUBMITTED:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="This assessment has already been submitted.",
+            detail="You have already sent us your answers.",
         )
     # A declined assessment is final - it must not be flipped back open.
     if assessment.interest_response == InterestResponse.NOT_INTERESTED:
@@ -191,7 +236,7 @@ def _question_for_assessment(db: Session, assessment: Assessment, question_id: i
     if question is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="This question is not part of your assessment.",
+            detail="This question is not part of your questionnaire.",
         )
     return question
 
@@ -204,10 +249,15 @@ def save_answer(
     selected_option_id: int | None,
     subjective_answer: str | None,
 ) -> AssessmentAnswer:
+    if close_if_expired(db, assessment):
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="Your time has run out. Your answers have been sent to us as they were.",
+        )
     if assessment.status == AssessmentStatus.SUBMITTED:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="This assessment has already been submitted and can no longer be changed.",
+            detail="You have already sent us your answers, so they can no longer be changed.",
         )
 
     question = _question_for_assessment(db, assessment, question_id)
@@ -267,12 +317,21 @@ def is_answered(answer: AssessmentAnswer | None) -> bool:
     return bool(answer.subjective_answer and answer.subjective_answer.strip())
 
 
+def answer_counts(db: Session, assessment: Assessment) -> tuple[int, int]:
+    """(answered, total) for this assessment's paper."""
+    questions = db.scalars(
+        select(Question).where(Question.question_paper_id == assessment.question_paper_id)
+    ).all()
+    answers = answered_flags(db, assessment)
+    return sum(1 for q in questions if is_answered(answers.get(q.id))), len(questions)
+
+
 def submit_assessment(db: Session, assessment: Assessment) -> tuple[Assessment, int, int]:
     # Idempotent: a repeat submit returns the original submission rather than duplicating it.
     if assessment.status == AssessmentStatus.SUBMITTED:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="This assessment has already been submitted.",
+            detail="You have already sent us your answers.",
         )
 
     questions = db.scalars(
@@ -410,8 +469,15 @@ def build_result(db: Session, assessment: Assessment) -> dict:
     else:
         eval_status = EvaluationStatus.COMPLETED if fully_evaluated else EvaluationStatus.PENDING
 
+    answered, _total = answer_counts(db, assessment)
+    # SQLite hands timestamps back naive, so normalise before comparing with the deadline.
+    deadline = expires_at(assessment)
+    submitted = utc(assessment.submitted_at)
     return {
         "assessment_id": assessment.id,
+        "duration_minutes": assessment.duration_minutes,
+        "answered_count": answered,
+        "auto_submitted": bool(deadline and submitted and submitted >= deadline),
         "candidate_name": assessment.candidate_name,
         "candidate_email": assessment.candidate_email,
         "role_name": assessment.role.role_name,
@@ -436,6 +502,7 @@ def build_result(db: Session, assessment: Assessment) -> dict:
 
 def to_row(db: Session, assessment: Assessment) -> dict:
     objective_max, subjective_max, _ = scoring_service.paper_totals(db, assessment.question_paper_id)
+    answered, total = answer_counts(db, assessment)
     return {
         "id": assessment.id,
         "candidate_name": assessment.candidate_name,
@@ -458,6 +525,9 @@ def to_row(db: Session, assessment: Assessment) -> dict:
         "interest_response": assessment.interest_response,
         "interest_responded_at": assessment.interest_responded_at,
         "resume_confirmed_at": assessment.resume_confirmed_at,
+        "expires_at": expires_at(assessment),
+        "answered_count": answered,
+        "question_count": total,
     }
 
 

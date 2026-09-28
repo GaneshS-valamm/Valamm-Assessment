@@ -85,7 +85,7 @@ Check which database is live at any time: <http://localhost:8000/api/health>
 
 ---
 
-## 3. Testing a candidate assessment end to end
+## 3. Testing the flow end to end
 
 1. Log in at http://localhost:5173/login
 2. **Generate Assessment** → enter a name and email, pick one of the four roles, click
@@ -228,6 +228,8 @@ deleted, and submission sets `is_locked` on every version of that assessment's r
 | POST | `/api/assessments/{token}/resume/confirm` | candidate token (resume reviewed, accepted as-is) |
 | POST | `/api/assessments/{token}/interest` | candidate token (`{"interested": true\|false}`) |
 | POST | `/api/admin/assessments/{assessment_id}/resume` | admin (attach a resume for the candidate) |
+| GET | `/api/admin/resumes/{resume_id}/preview` | admin (inline view: PDF flag, or DOCX as text) |
+| GET | `/api/assessments/{token}/resume/preview` | candidate token (same, for their own resume) |
 | GET | `/api/admin/resumes` | admin (search, filters, pagination, `new_count`) |
 | GET | `/api/admin/resumes/unreviewed-count` | admin (badge polling) |
 | GET | `/api/admin/resumes/{resume_id}` | admin (metadata + assessment + version history) |
@@ -267,10 +269,17 @@ Interactive docs: <http://localhost:8000/docs>
   the candidate has reviewed it, and `interest_response = INTERESTED`. `GET /questions` and
   `POST /start` both enforce this, so it cannot be bypassed from the frontend.
 * A `NOT_INTERESTED` response is final — attempting to flip it back returns 409.
+* The time limit is enforced server-side from the stored `started_at`, never from a client-supplied
+  clock; expired saves return `410` and the paper is closed automatically.
+* Resumes open inline through the authenticated endpoints only — no public URL, no download needed.
 
 ---
 
-## 8. Candidate pre-assessment flow
+## 8. Candidate flow
+
+The candidate-facing app never uses the words *assessment* or *test*. It is framed as a short set of
+questions from the recruitment team, with a prominent note that there are no right or wrong answers
+and that answers should be written by the candidate rather than generated with AI tools.
 
 ```
 admin generates link  ->  admin attaches resume  ->  candidate opens link
@@ -279,24 +288,35 @@ admin generates link  ->  admin attaches resume  ->  candidate opens link
                                       (confirm as-is, or upload a new version)
                                                           |
                                       Step 2: "go ahead with this role?"
-                                            /                        \
-                                       Yes                            No
+                                            /                                                               Yes                            No
                                         |                              |
-                             question paper released      "Thank you for your response"
-                                        |                     assessment closed
-                              answers -> submit                  (final, 409 on retry)
+                              questions released          "Thank you for your response"
+                              timer starts                     link closed
+                                        |                   (final, 409 on retry)
+                        answers typed -> sent, or the timer sends them
 ```
 
-State lives on the assessment row: `resume_confirmed_at`, `interest_response`
-(`PENDING` / `INTERESTED` / `NOT_INTERESTED`) and `interest_responded_at`. Every resume version
-records `uploaded_by_type` (`ADMIN` or `CANDIDATE`), so the admin can see at a glance whether the
-candidate replaced what was sent to them.
+### Timer
 
-Set `RESUME_REQUIRED_BEFORE_START=false` in `.env` to skip the resume and review gates; the interest
-gate always applies.
+The admin sets the duration when generating the link (default 60 minutes). The clock starts when the
+candidate begins, not when the link is created.
 
-If the admin has not attached a resume, the candidate is told so and may upload one themselves
-rather than being blocked.
+* The candidate sees a live countdown in the header: neutral, amber in the last five minutes, then a
+  pulsing red in the final minute.
+* At zero the paper closes and the answers are sent exactly as they stand.
+* **The server is the authority.** `expires_at` is derived from `started_at + duration_minutes`, and
+  every candidate request calls `close_if_expired()`. Answer saves past the deadline are refused with
+  `410 Gone`, and the paper is marked submitted with `submitted_at` set to the deadline — so closing
+  the tab, reloading, or changing the device clock cannot buy extra time.
+* The admin sees a **Closed by timer** badge and the count of questions answered before time ran out.
+
+State on the assessment row: `resume_confirmed_at`, `interest_response`
+(`PENDING` / `INTERESTED` / `NOT_INTERESTED`), `interest_responded_at`. Each resume version records
+`uploaded_by_type` (`ADMIN` or `CANDIDATE`) so the admin can see whether the candidate replaced what
+was sent.
+
+Set `RESUME_REQUIRED_BEFORE_START=false` to skip the resume gates; the interest gate always applies.
+If the admin has not attached a resume, the candidate is told so and may upload one themselves.
 
 ---
 
@@ -330,27 +350,32 @@ workflow changes — the database only ever holds the `storage_key`.
 
 ## 10. Question papers
 
-38 questions across the four roles. Source of truth: the JSON files in `backend/question_bank/`.
+All four papers are the **official Valamm.AI screening forms**, transcribed verbatim. Source of
+truth: the JSON files in `backend/question_bank/`.
 
-| Role | Paper | Questions | Marks |
-| --- | --- | --- | --- |
-| Enterprise Sales Manager – Agentic AI Solutions | drafted | 4 objective × 5 + 4 subjective × 20 | 100 |
-| AWS Partner Operations & Marketplace Specialist | drafted | 4 objective × 5 + 4 subjective × 20 | 100 |
-| Sales Development Representative (SDR) – Enterprise Sales | **the real Valamm.AI screening form** | 14 free-text | 100 |
-| Account Manager – Enterprise Sales | drafted | 4 objective × 5 + 4 subjective × 20 | 100 |
+| Role | Source document | Questions |
+| --- | --- | --- |
+| Enterprise Sales Manager – Agentic AI Solutions | `Enterprise_Sales_Manager_Candidate_Screening_Form.docx` | 14 |
+| AWS Partner Operations & Marketplace Specialist | `AWS_Partner_Ops_Marketplace_Candidate_Screening_Form (1).docx` | 14 |
+| Sales Development Representative (SDR) – Enterprise Sales | `SDR_Candidate_Screening_Form_1.docx` | 14 |
+| Account Manager – Enterprise Sales | `Account_Manager_Candidate_Screening_Form (3).docx` | 15 |
 
-The SDR paper is transcribed verbatim from `SDR_Candidate_Screening_Form_1.docx` — all 14 questions
-are free-text with no multiple choice, exactly as on the form. The form carries no marks, so the
-weighting below was added for this platform and can be changed freely in the JSON: logistics and
-factual questions are worth little (location 2, WFO 4, years 4, notice 2, CTC 2), the substantive
-ones carry the paper (converting a cold prospect 14, targets and numbers 12, past experience 10,
-role fit 10, recent success 10, recent failure 10, global experience 8, CRM tools 6, cold calling 6).
-Totals 100, so the percentage stays meaningful. Each question has evaluation criteria written for the
-evaluator, including which answers should be treated as informational only and which are screening
-gates (daily office attendance, willingness to cold call).
+**Every question is free-text** — there are no multiple-choice options anywhere, and candidates type
+every answer.
 
-A paper with no objective questions scores entirely through human evaluation: the objective card
-reads *Not applicable*, and the final score stays *Pending Evaluation* until all 14 are marked.
+Two deliberate deviations from the source documents, both recorded in each file's `paper_notes`:
+
+* The **AWS form's own numbering skips 8, 9, 13 and 14**. The 14 questions it contains are
+  renumbered 1–14 so they display in a continuous sequence.
+* The **Account Manager form gains one question at position 12** — *"Have you sold AI products or
+  software into enterprises? Which industries do you know best?"* — so its original questions 12–14
+  shift to 13–15. The Enterprise Sales Manager form already carried that question at position 12.
+
+**Nothing is scored.** These are screening forms read by a human, not tests: there are no marks, no
+percentages and no pass mark anywhere in the product. The admin reads each answer and records
+free-text reviewer notes against it. Each question carries *what to look for* guidance, stored on the
+backend and never sent to candidates.
+
 
 * **Editing questions:** change the JSON, then run `python -m app.seed` (or restart the backend).
   The seed compares each file against the database and acts accordingly:
@@ -381,6 +406,24 @@ All six acceptance workflows were executed against the running application:
 | 4 — Autosave and submission | Pass. 8/8 answers persisted, restored byte-for-byte after re-fetch (newlines and code indentation intact); submit → `SUBMITTED`; second submit → 409; post-submit edit → 409; reopening the link shows the submitted state |
 | 5 — Admin results | Pass. Objective auto-scored 15/20 (3 of 4 correct); selected vs. correct option shown per question; full subjective text shown; evaluations saved and re-read; final score stayed `Pending Evaluation` until all four were marked, then resolved to 78/100 = 78% |
 | 6 — Persistence | Pass. After stopping and restarting the backend, all assessments, links, answers, timestamps and evaluations were still present and correct |
+
+### Real screening forms, timer, previews (35/35 checks)
+
+| Check | Result |
+| --- | --- |
+| Four papers from the real documents | Pass. 14 / 14 / 14 / 15 questions, all free-text, no options anywhere, orders continuous |
+| Requested Q12 present | Pass. On both the Enterprise Sales Manager and Account Manager papers |
+| Verbatim text | Pass. Six questions spot-checked character-for-character against the source documents |
+| Timer set on start, not on link creation | Pass. No deadline before starting; 299s remaining on a 5-minute paper |
+| Answers accepted before the deadline | Pass |
+| Answers refused after it | Pass. `410 Gone`, and the paper is auto-submitted by the server |
+| Answers saved before expiry are kept | Pass |
+| Admin sees it was closed by the timer | Pass. `auto_submitted` true, 1 of 15 answered |
+| Every question paired with its answer | Pass. 15/15, multi-line text preserved |
+| Reviewer notes without marks | Pass. Saved, persisted and timestamped with no marks in the payload |
+| PDF opens inline | Pass. `Content-Disposition: inline`, no download |
+| DOCX opens inline | Pass. Rendered as text server-side, 2329 chars, no XML leakage |
+| Preview requires auth | Pass. 401 without a token |
 
 ### Admin-upload / review / interest flow (30/30 checks)
 

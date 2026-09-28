@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApi, formatDateTime } from '../services/api';
 import type { AssessmentRow, DashboardStats } from '../types';
-import { Alert, EvaluationBadge, Spinner, StatusBadge } from '../components/ui';
+import { Alert, Spinner, StatusBadge } from '../components/ui';
 
 const CARDS: { key: keyof DashboardStats; label: string; tone: string }[] = [
   { key: 'total_generated', label: 'Total Assessments Generated', tone: 'bg-brand-50 text-brand-700' },
@@ -77,12 +77,12 @@ export default function Dashboard() {
         </Alert>
       )}
 
-      {stats && stats.pending_evaluation > 0 && (
+      {stats && stats.submitted > 0 && (
         <Alert kind="info">
-          <strong>{stats.pending_evaluation}</strong> submitted assessment
-          {stats.pending_evaluation === 1 ? '' : 's'} awaiting subjective evaluation.{' '}
+          <strong>{stats.submitted}</strong> submitted assessment
+          {stats.submitted === 1 ? '' : 's'} ready to read.{' '}
           <Link className="font-semibold underline" to="/admin/candidates?status=SUBMITTED">
-            Review now
+            View answers
           </Link>
         </Alert>
       )}
@@ -109,9 +109,7 @@ export default function Dashboard() {
                   <th className="th">Status</th>
                   <th className="th">Created</th>
                   <th className="th">Submitted</th>
-                  <th className="th">Objective</th>
-                  <th className="th">Evaluation</th>
-                  <th className="th" />
+                  <th className="th">Answers</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -127,21 +125,13 @@ export default function Dashboard() {
                     </td>
                     <td className="td whitespace-nowrap text-xs">{formatDateTime(r.created_at)}</td>
                     <td className="td whitespace-nowrap text-xs">{formatDateTime(r.submitted_at)}</td>
-                    <td className="td whitespace-nowrap">
-                      {r.status !== 'SUBMITTED'
-                        ? '—'
-                        : r.objective_max === 0
-                          ? 'n/a'
-                          : `${r.objective_score ?? 0} / ${r.objective_max}`}
-                    </td>
                     <td className="td">
-                      <EvaluationBadge status={r.evaluation_status} />
-                    </td>
-                    <td className="td">
-                      {r.status === 'SUBMITTED' && (
-                        <Link to={`/admin/results/${r.id}`} className="btn-secondary !px-3 !py-1.5">
-                          Result
+                      {r.answered_count > 0 ? (
+                        <Link to={`/admin/results/${r.id}`} className="btn-secondary !px-3 !py-1.5 !text-xs">
+                          View Answers ({r.answered_count}/{r.question_count})
                         </Link>
+                      ) : (
+                        <span className="text-xs text-slate-400">—</span>
                       )}
                     </td>
                   </tr>
