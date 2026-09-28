@@ -7,8 +7,16 @@ import type {
   CandidateResume,
   InterestResponse,
   ResumePreview,
+  Role,
 } from '../types';
 import { Alert, Modal, Spinner } from '../components/ui';
+
+// Wording about picking a role is handled by the role step itself, and the candidate UI
+// must not mention a question count or a time limit.
+const HIDDEN_INSTRUCTIONS = [
+  'Let us know whether you would like to go ahead with this role.',
+  'Use Previous / Next or the question panel to move between questions.',
+];
 
 type Phase = 'loading' | 'welcome' | 'exam' | 'submitted' | 'declined' | 'error';
 type SaveState = 'idle' | 'saving' | 'saved' | 'retrying' | 'failed';
@@ -29,6 +37,8 @@ export default function CandidateAssessment() {
   const [deadline, setDeadline] = useState<number | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [timeUp, setTimeUp] = useState(false);
+  // 'role' = declined the applied role, choosing among the others.
+  const [interestStep, setInterestStep] = useState<'ask' | 'role'>('ask');
 
   /* ----------------------------- bootstrap ----------------------------- */
   useEffect(() => {
@@ -92,13 +102,43 @@ export default function CandidateAssessment() {
 
   async function answerInterest(interested: boolean) {
     setError('');
+    // Declining the applied role offers the other roles before closing anything.
+    if (!interested) {
+      setInterestStep('role');
+      return;
+    }
     try {
-      const m = await candidateApi.declareInterest(token, interested);
+      const m = await candidateApi.declareInterest(token, true);
       setMeta(m);
-      if (!interested) setPhase('declined');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not record your response.');
     }
+  }
+
+  async function chooseOtherRole(roleId: number) {
+    setError('');
+    try {
+      const m = await candidateApi.chooseRole(token, roleId);
+      setMeta(m);
+      setInterestStep('ask');
+      const q = await candidateApi.questions(token);
+      setQuestions(q.questions);
+      applyDeadline(q.seconds_remaining);
+      setIndex(0);
+      setPhase('exam');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not switch to that role.');
+    }
+  }
+
+  async function declineAllRoles() {
+    setError('');
+    try {
+      await candidateApi.declareInterest(token, false);
+    } catch {
+      /* the screen below is the response either way */
+    }
+    setPhase('declined');
   }
 
   /* ------------------------------ countdown ---------------------------- */
@@ -271,8 +311,8 @@ export default function CandidateAssessment() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Thank you for your response</h1>
           <p className="mt-3 text-slate-600">
-            We have noted that you would prefer not to go ahead with this role at the moment.
-            There is nothing further for you to do.
+            We have noted that you would prefer not to go ahead at the moment. There is nothing
+            further for you to do.
           </p>
           <p className="mt-4 text-sm text-slate-500">
             We appreciate you taking the time to let us know, {meta?.candidate_name}.
@@ -284,7 +324,7 @@ export default function CandidateAssessment() {
             </div>
             <div className="flex justify-between gap-4">
               <dt className="text-slate-500">Your response</dt>
-              <dd className="font-medium text-slate-900">Not interested</dd>
+              <dd className="font-medium text-slate-900">Not at this time</dd>
             </div>
             {meta?.interest_responded_at && (
               <div className="flex justify-between gap-4">
@@ -361,33 +401,6 @@ export default function CandidateAssessment() {
             team - please read the note before you begin.
           </p>
 
-          <div className="mt-5 rounded-xl border border-brand-200 bg-brand-50 p-5">
-            <p className="text-sm font-semibold text-brand-900">
-              This is not a test, and there are no right or wrong answers.
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-brand-900">
-              We just want an idea of how you think and how you approach your work. Please write the
-              answers yourself, in your own words &mdash; <strong>please don't use AI tools to
-              generate them</strong>. A short, honest answer in plain language tells us far more than
-              a polished one, so write the way you would explain something to a colleague.
-            </p>
-          </div>
-
-          <dl className="mt-6 grid gap-4 rounded-xl border border-slate-200 bg-slate-50 p-5 sm:grid-cols-2">
-            <Field label="Candidate Name" value={meta.candidate_name} />
-            <Field label="Candidate Email" value={meta.candidate_email} />
-            <Field label="Assigned Role" value={meta.role_name} />
-            <Field label="Number of Questions" value={String(meta.question_count)} />
-            <Field
-              label="Time Limit"
-              value={
-                meta.duration_minutes
-                  ? `${meta.duration_minutes} minutes`
-                  : 'Not timed'
-              }
-            />
-          </dl>
-
           <ResumeReview
             token={token}
             resume={meta.resume}
@@ -406,18 +419,24 @@ export default function CandidateAssessment() {
             roleName={meta.role_name}
             enabled={meta.resume_confirmed_at !== null}
             response={meta.interest_response}
+            step={interestStep}
+            otherRoles={meta.other_roles}
             onAnswer={answerInterest}
+            onChooseRole={chooseOtherRole}
+            onDeclineAll={declineAllRoles}
           />
 
-          <div className="mt-6">
-            <h2 className="text-sm font-semibold text-slate-900">Before you start</h2>
-            <ul className="mt-2 space-y-2 text-sm text-slate-600">
-              {meta.instructions.map((line) => (
-                <li key={line} className="flex gap-2">
-                  <span className="text-brand-600">•</span>
-                  {line}
-                </li>
-              ))}
+          <div className="mt-6 rounded-xl border-2 border-brand-300 bg-brand-50 p-5">
+            <h2 className="text-base font-bold text-brand-900">Before you start</h2>
+            <ul className="mt-3 space-y-2.5 text-sm font-medium leading-relaxed text-brand-900">
+              {meta.instructions
+                .filter((line) => !HIDDEN_INSTRUCTIONS.includes(line))
+                .map((line) => (
+                  <li key={line} className="flex gap-2">
+                    <span className="mt-0.5 font-bold text-brand-600">•</span>
+                    <span>{line}</span>
+                  </li>
+                ))}
             </ul>
           </div>
 
@@ -950,23 +969,30 @@ function InterestGate({
   roleName,
   enabled,
   response,
+  step,
+  otherRoles,
   onAnswer,
+  onChooseRole,
+  onDeclineAll,
 }: {
   roleName: string;
   enabled: boolean;
   response: InterestResponse;
+  step: 'ask' | 'role';
+  otherRoles: Role[];
   onAnswer: (interested: boolean) => Promise<void>;
+  onChooseRole: (roleId: number) => Promise<void>;
+  onDeclineAll: () => Promise<void>;
 }) {
   const [busy, setBusy] = useState(false);
-  const [confirming, setConfirming] = useState(false);
+  const [picked, setPicked] = useState<number | null>(null);
 
-  async function answer(interested: boolean) {
+  async function run(fn: () => Promise<void>) {
     setBusy(true);
     try {
-      await onAnswer(interested);
+      await fn();
     } finally {
       setBusy(false);
-      setConfirming(false);
     }
   }
 
@@ -977,70 +1003,104 @@ function InterestGate({
       }`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-slate-900">
-          Step 2 &middot; Confirm your interest
-        </h2>
+        <h2 className="text-sm font-semibold text-slate-900">Step 2 &middot; The role</h2>
         {response === 'INTERESTED' ? (
-          <span className="badge bg-emerald-100 text-emerald-800">Yes &mdash; proceeding</span>
+          <span className="badge bg-emerald-100 text-emerald-800">Ready to begin</span>
         ) : (
           <span className="badge bg-amber-100 text-amber-800">Action needed</span>
         )}
       </div>
 
-      <p className="mt-1.5 text-sm text-slate-600">
-        Would you like to go ahead with the <strong className="text-slate-900">{roleName}</strong>{' '}
-        role and answer a few questions from our team?
-      </p>
-
       {!enabled ? (
-        <p className="mt-3 text-xs text-slate-500">
-          Please review your resume above first.
-        </p>
+        <p className="mt-3 text-xs text-slate-500">Please review your resume above first.</p>
       ) : response === 'INTERESTED' ? (
         <p className="mt-3 text-sm font-semibold text-emerald-700">
           &#10003; Thank you &mdash; you can begin below.
         </p>
-      ) : (
-        <div className="mt-4 flex flex-wrap gap-3">
-          <button
-            type="button"
-            className="btn-primary !bg-emerald-600 hover:!bg-emerald-700"
-            onClick={() => void answer(true)}
-            disabled={busy}
-          >
-            Yes, I am interested
-          </button>
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => setConfirming(true)}
-            disabled={busy}
-          >
-            No, not at this time
-          </button>
-        </div>
-      )}
-
-      {confirming && (
-        <Modal
-          title="Decline this role?"
-          onClose={() => setConfirming(false)}
-          footer={
-            <>
-              <button className="btn-secondary" onClick={() => setConfirming(false)} disabled={busy}>
-                Go back
-              </button>
-              <button className="btn-primary" onClick={() => void answer(false)} disabled={busy}>
-                {busy ? 'Recording\u2026' : 'Yes, decline'}
-              </button>
-            </>
-          }
-        >
-          <p>
-            If you choose <strong>No</strong>, these questions will close and you will not be able
-            to answer them. This cannot be undone from this link.
+      ) : step === 'ask' ? (
+        <>
+          <p className="mt-1.5 text-sm text-slate-600">
+            Would you like to go ahead with the{' '}
+            <strong className="text-slate-900">{roleName}</strong> role?
           </p>
-        </Modal>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              type="button"
+              className="btn-primary !bg-emerald-600 hover:!bg-emerald-700"
+              onClick={() => void run(() => onAnswer(true))}
+              disabled={busy}
+            >
+              Yes, I am interested
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => void run(() => onAnswer(false))}
+              disabled={busy}
+            >
+              No, not this time
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="mt-1.5 text-sm font-semibold text-slate-900">
+            Are you interested in other roles?
+          </p>
+          <p className="mt-1 text-sm text-slate-600">
+            Pick one and we will show you the questions for it instead.
+          </p>
+
+          <div className="mt-4 space-y-2.5">
+            {otherRoles.map((r) => (
+              <label
+                key={r.id}
+                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 text-sm transition ${
+                  picked === r.id
+                    ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-500/20'
+                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="other-role"
+                  className="mt-0.5 h-4 w-4 accent-brand-600"
+                  checked={picked === r.id}
+                  onChange={() => setPicked(r.id)}
+                  disabled={busy}
+                />
+                <span>
+                  <span className="font-medium text-slate-900">{r.role_name}</span>
+                  {r.description && (
+                    <span className="mt-0.5 block text-xs text-slate-500">{r.description}</span>
+                  )}
+                </span>
+              </label>
+            ))}
+            {otherRoles.length === 0 && (
+              <p className="text-sm text-slate-500">There are no other open roles right now.</p>
+            )}
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => picked !== null && void run(() => onChooseRole(picked))}
+              disabled={busy || picked === null}
+            >
+              {busy ? 'Opening\u2026' : 'Continue with this role'}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => void run(onDeclineAll)}
+              disabled={busy}
+            >
+              No, none of these
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

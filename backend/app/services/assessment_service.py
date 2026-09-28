@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..config import settings
@@ -13,6 +13,7 @@ from ..models import (
     AssessmentAnswer,
     AssessmentEvaluation,
     AssessmentStatus,
+    CandidateResume,
     EvaluationStatus,
     InterestResponse,
     Question,
@@ -22,7 +23,10 @@ from ..models import (
     Role,
     utcnow,
 )
+from pathlib import Path
+
 from . import resume_service, scoring_service
+from .storage_service import LocalDiskStorage, StorageError, get_storage
 from ..security import decrypt_token, encrypt_token
 from .token_service import build_assessment_url, new_token_pair
 
@@ -34,7 +38,7 @@ CANDIDATE_INSTRUCTIONS = [
     "Let us know whether you would like to go ahead with this role.",
     "Your answers are saved automatically as you type - you can safely refresh or reopen the link.",
     "Use Previous / Next or the question panel to move between questions.",
-    "There is a time limit. When it runs out your answers are sent to us as they are.",
+    "Please keep an eye on the clock. When it runs out your answers are sent to us as they are.",
 ]
 
 
@@ -62,7 +66,14 @@ def question_count(db: Session, question_paper_id: int) -> int:
 
 
 def create_assessment(
-    db: Session, *, candidate_name: str, candidate_email: str, role_id: int, duration_minutes: int | None
+    db: Session,
+    *,
+    candidate_name: str,
+    candidate_email: str,
+    role_id: int,
+    duration_minutes: int | None,
+    interviewer_1: str | None = None,
+    interviewer_2: str | None = None,
 ) -> tuple[Assessment, str]:
     role = db.get(Role, role_id)
     if role is None or not role.is_active:
@@ -80,6 +91,7 @@ def create_assessment(
         candidate_name=candidate_name,
         candidate_email=candidate_email.strip().lower(),
         role_id=role.id,
+        test_role_id=role.id,  # starts equal to the applied role
         question_paper_id=paper.id,
         question_paper_version=paper.version,
         unique_token_hash=token_hash,
@@ -87,6 +99,8 @@ def create_assessment(
         status=AssessmentStatus.GENERATED,
         duration_minutes=duration_minutes or settings.DEFAULT_DURATION_MINUTES,
         evaluation_status=EvaluationStatus.PENDING,
+        interviewer_1=(interviewer_1 or "").strip() or None,
+        interviewer_2=(interviewer_2 or "").strip() or None,
     )
     db.add(assessment)
     db.commit()
@@ -211,6 +225,113 @@ def record_interest(db: Session, assessment: Assessment, interested: bool) -> As
     db.commit()
     db.refresh(assessment)
     return assessment
+
+
+def require_resume_on_file(db: Session, assessment: Assessment) -> None:
+    """Resume gate only - used where the interest gate must not apply yet."""
+    if not settings.RESUME_REQUIRED_BEFORE_START:
+        return
+    if resume_service.current_resume(db, assessment.id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_412_PRECONDITION_FAILED,
+            detail="Please upload your resume before choosing a role.",
+        )
+    if assessment.resume_confirmed_at is None:
+        raise HTTPException(
+            status_code=status.HTTP_412_PRECONDITION_FAILED,
+            detail="Please review the resume on file and either confirm it or upload a new one.",
+        )
+
+
+def switch_test_role(db: Session, assessment: Assessment, new_role_id: int) -> Assessment:
+    """Point the assessment at a different role's paper.
+
+    The applied role (`role_id`) is never touched - only `test_role_id` and the pinned
+    question paper change. Any answers already saved belong to the previous paper's
+    questions, so they are cleared; nothing else about the candidate is disturbed.
+    """
+    if assessment.status == AssessmentStatus.SUBMITTED:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You have already sent us your answers.",
+        )
+
+    role = db.get(Role, new_role_id)
+    if role is None or not role.is_active:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unknown role.")
+
+    paper = active_paper_for_role(db, role.id)
+    if question_count(db, paper.id) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="There are no questions available for that role at the moment.",
+        )
+
+    try:
+        if paper.id != assessment.question_paper_id:
+            # Answers reference the old paper's question ids; they cannot carry over.
+            db.execute(
+                delete(AssessmentAnswer).where(AssessmentAnswer.assessment_id == assessment.id)
+            )
+            db.execute(
+                delete(AssessmentEvaluation).where(
+                    AssessmentEvaluation.assessment_id == assessment.id
+                )
+            )
+
+        assessment.test_role_id = role.id
+        assessment.question_paper_id = paper.id
+        assessment.question_paper_version = paper.version
+        # Choosing a role is itself a yes, and the clock restarts for the new paper.
+        assessment.interest_response = InterestResponse.INTERESTED
+        assessment.interest_responded_at = utcnow()
+        assessment.status = AssessmentStatus.IN_PROGRESS
+        assessment.started_at = utcnow()
+
+        # Keep the resume pointing at the role actually being assessed.
+        for resume in db.scalars(
+            select(CandidateResume).where(CandidateResume.assessment_id == assessment.id)
+        ).all():
+            resume.role_id = role.id
+
+        db.commit()
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise
+    db.refresh(assessment)
+    return assessment
+
+
+def delete_assessment(db: Session, assessment: Assessment) -> None:
+    """Remove a candidate's assessment and everything hanging off it.
+
+    Answers and evaluations cascade from the assessment row; resume rows cascade too, so
+    their stored files are removed first to avoid orphaning them in the storage backend.
+    """
+    keys = list(
+        db.scalars(
+            select(CandidateResume.storage_key).where(
+                CandidateResume.assessment_id == assessment.id
+            )
+        ).all()
+    )
+    try:
+        db.delete(assessment)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    storage = get_storage()
+    for key in keys:
+        try:
+            if isinstance(storage, LocalDiskStorage) and storage.exists(key):
+                (Path(storage.root) / key).unlink(missing_ok=True)
+        except (StorageError, OSError):
+            # The row is already gone; a leftover file is not worth failing the request.
+            pass
 
 
 def start_assessment(db: Session, assessment: Assessment) -> Assessment:
@@ -481,6 +602,10 @@ def build_result(db: Session, assessment: Assessment) -> dict:
         "candidate_name": assessment.candidate_name,
         "candidate_email": assessment.candidate_email,
         "role_name": assessment.role.role_name,
+        "applied_role_name": assessment.role.role_name,
+        "test_role_name": (assessment.test_role.role_name if assessment.test_role else None),
+        "interviewer_1": assessment.interviewer_1,
+        "interviewer_2": assessment.interviewer_2,
         "status": assessment.status,
         "question_paper_title": assessment.paper.paper_title,
         "question_paper_version": assessment.question_paper_version,
@@ -509,6 +634,13 @@ def to_row(db: Session, assessment: Assessment) -> dict:
         "candidate_email": assessment.candidate_email,
         "role_id": assessment.role_id,
         "role_name": assessment.role.role_name,
+        "applied_role_name": assessment.role.role_name,
+        "test_role_id": assessment.test_role_id,
+        "test_role_name": (
+            assessment.test_role.role_name if assessment.test_role else None
+        ),
+        "interviewer_1": assessment.interviewer_1,
+        "interviewer_2": assessment.interviewer_2,
         "question_paper_version": assessment.question_paper_version,
         "status": assessment.status,
         "duration_minutes": assessment.duration_minutes,

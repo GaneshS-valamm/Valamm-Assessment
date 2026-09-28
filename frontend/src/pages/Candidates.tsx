@@ -6,6 +6,7 @@ import {
   Alert,
   CopyButton,
   InterestBadge,
+  Modal,
   Spinner,
   StatusBadge,
   UploadButton,
@@ -22,6 +23,8 @@ export default function Candidates() {
   const [error, setError] = useState('');
   const [uploadingFor, setUploadingFor] = useState<number | null>(null);
   const [notice, setNotice] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<AssessmentRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const search = params.get('search') ?? '';
   const roleId = params.get('role_id') ?? '';
@@ -79,6 +82,41 @@ export default function Candidates() {
       setError(err instanceof Error ? err.message : 'Upload failed.');
     } finally {
       setUploadingFor(null);
+    }
+  }
+
+  /** Persist one interviewer field; called on blur so typing is not interrupted. */
+  async function saveInterviewer(row: AssessmentRow, field: 1 | 2, value: string) {
+    const current = field === 1 ? row.interviewer_1 : row.interviewer_2;
+    if ((current ?? '') === value.trim()) return;
+    setError('');
+    try {
+      const updated = await adminApi.updateAssessment(row.id, {
+        interviewer_1: field === 1 ? value : row.interviewer_1,
+        interviewer_2: field === 2 ? value : row.interviewer_2,
+      });
+      setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+      setNotice(`Interviewer ${field} saved for ${row.candidate_name}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save the interviewer.');
+      void load();
+    }
+  }
+
+  async function doDelete() {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    setError('');
+    try {
+      const res = await adminApi.deleteAssessment(confirmDelete.id);
+      setRows((prev) => prev.filter((r) => r.id !== confirmDelete.id));
+      setTotal((t) => Math.max(0, t - 1));
+      setNotice(res.message);
+      setConfirmDelete(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not delete the record.');
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -154,7 +192,10 @@ export default function Candidates() {
                 <tr>
                   <th className="th">Candidate Name</th>
                   <th className="th">Candidate Email</th>
-                  <th className="th">Technical Role</th>
+                  <th className="th">Applied Role</th>
+                  <th className="th">Test Role</th>
+                  <th className="th">Interviewer 1</th>
+                  <th className="th">Interviewer 2</th>
                   <th className="th">Assessment Link</th>
                   <th className="th">Resume</th>
                   <th className="th">Candidate Interest</th>
@@ -162,6 +203,7 @@ export default function Candidates() {
                   <th className="th">Status</th>
                   <th className="th">Submission Date</th>
                   <th className="th">Answers</th>
+                  <th className="th">Delete</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -169,7 +211,45 @@ export default function Candidates() {
                   <tr key={r.id} className="hover:bg-slate-50">
                     <td className="td font-semibold text-slate-900">{r.candidate_name}</td>
                     <td className="td text-xs">{r.candidate_email}</td>
-                    <td className="td min-w-[200px]">{r.role_name}</td>
+                    <td className="td min-w-[190px]">{r.applied_role_name}</td>
+                    <td className="td min-w-[190px]">
+                      {r.test_role_name ? (
+                        <span
+                          className={
+                            r.test_role_name === r.applied_role_name
+                              ? 'text-slate-700'
+                              : 'font-semibold text-violet-800'
+                          }
+                        >
+                          {r.test_role_name}
+                          {r.test_role_name !== r.applied_role_name && (
+                            <span className="mt-0.5 block text-xs font-normal text-violet-600">
+                              switched by candidate
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
+                    </td>
+                    <td className="td">
+                      <input
+                        className="input !w-36 !px-2 !py-1 !text-xs"
+                        defaultValue={r.interviewer_1 ?? ''}
+                        placeholder="Add name"
+                        onBlur={(e) => void saveInterviewer(r, 1, e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+                      />
+                    </td>
+                    <td className="td">
+                      <input
+                        className="input !w-36 !px-2 !py-1 !text-xs"
+                        defaultValue={r.interviewer_2 ?? ''}
+                        placeholder="Add name"
+                        onBlur={(e) => void saveInterviewer(r, 2, e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+                      />
+                    </td>
                     <td className="td">
                       {r.assessment_url ? (
                         <CopyButton
@@ -210,6 +290,15 @@ export default function Candidates() {
                         <span className="text-xs text-slate-400">No answers yet</span>
                       )}
                     </td>
+                    <td className="td">
+                      <button
+                        type="button"
+                        className="btn-secondary !px-3 !py-1.5 !text-xs !text-rose-700 hover:!bg-rose-50"
+                        onClick={() => setConfirmDelete(r)}
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -217,7 +306,49 @@ export default function Candidates() {
           </div>
         )}
 
-        {pages > 1 && (
+        {confirmDelete && (
+        <Modal
+          title={`Delete ${confirmDelete.candidate_name}?`}
+          onClose={() => setConfirmDelete(null)}
+          footer={
+            <>
+              <button
+                className="btn-secondary"
+                onClick={() => setConfirmDelete(null)}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn-primary !bg-rose-600 hover:!bg-rose-700"
+                onClick={doDelete}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting…' : 'Yes, delete permanently'}
+              </button>
+            </>
+          }
+        >
+          <div className="space-y-3">
+            <p>
+              This permanently removes <strong>{confirmDelete.candidate_name}</strong> (
+              {confirmDelete.candidate_email}) and everything held against them:
+            </p>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>the assessment link, which will stop working</li>
+              <li>
+                every answer they wrote
+                {confirmDelete.answered_count > 0 && ` (${confirmDelete.answered_count} so far)`}
+              </li>
+              <li>their uploaded resume and all earlier versions, including the stored files</li>
+              <li>any reviewer notes</li>
+            </ul>
+            <p className="font-semibold text-rose-700">This cannot be undone.</p>
+          </div>
+        </Modal>
+      )}
+
+      {pages > 1 && (
           <div className="flex items-center justify-between border-t border-slate-200 px-5 py-3 text-sm">
             <span className="text-slate-500">
               Page {page} of {pages}

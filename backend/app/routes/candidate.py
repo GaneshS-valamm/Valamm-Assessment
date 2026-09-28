@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from ..database import get_db
-from ..models import Assessment, AssessmentStatus, Question, QuestionType
+from ..models import Assessment, AssessmentStatus, Question, QuestionType, Role
 from ..config import settings
 from ..schemas import (
     AnswerSavedOut,
@@ -15,6 +15,8 @@ from ..schemas import (
     CandidateQuestionOut,
     CandidateQuestionsOut,
     InterestRequest,
+    RoleChoiceRequest,
+    RoleOut,
     ResumeOut,
     SubmitOut,
 )
@@ -39,10 +41,13 @@ def get_assessment(token: str, request: Request, db: Session = Depends(get_db)) 
     assessment = resolve_assessment(db, token)
     assessment_service.close_if_expired(db, assessment)
     resume = resume_service.current_resume(db, assessment.id)
+    # The candidate is shown the role they are answering for, which differs from the
+    # applied role once they have switched. The applied role stays on the admin side.
+    shown_role = assessment.test_role or assessment.role
     return CandidateAssessmentOut(
         candidate_name=assessment.candidate_name,
         candidate_email=assessment.candidate_email,
-        role_name=assessment.role.role_name,
+        role_name=shown_role.role_name,
         status=assessment.status,
         duration_minutes=assessment.duration_minutes,
         question_count=assessment_service.question_count(db, assessment.question_paper_id),
@@ -70,6 +75,17 @@ def get_assessment(token: str, request: Request, db: Session = Depends(get_db)) 
         interest_responded_at=assessment.interest_responded_at,
         expires_at=assessment_service.expires_at(assessment),
         seconds_remaining=assessment_service.seconds_remaining(assessment),
+        other_roles=[
+            RoleOut.model_validate(r)
+            for r in db.scalars(
+                select(Role)
+                .where(
+                    Role.is_active.is_(True),
+                    Role.id != (assessment.test_role_id or assessment.role_id),
+                )
+                .order_by(Role.id)
+            ).all()
+        ],
     )
 
 
@@ -96,6 +112,21 @@ def declare_interest(
     _guard(request, token)
     assessment = resolve_assessment(db, token)
     assessment_service.record_interest(db, assessment, payload.interested)
+    return get_assessment(token, request, db)
+
+
+@router.post("/{token}/role", response_model=CandidateAssessmentOut)
+def choose_role(
+    token: str,
+    payload: RoleChoiceRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> CandidateAssessmentOut:
+    """Candidate declined the applied role and picked a different one to answer for."""
+    _guard(request, token)
+    assessment = resolve_assessment(db, token)
+    assessment_service.require_resume_on_file(db, assessment)
+    assessment_service.switch_test_role(db, assessment, payload.role_id)
     return get_assessment(token, request, db)
 
 
@@ -148,7 +179,7 @@ def questions(token: str, request: Request, db: Session = Depends(get_db)) -> Ca
 
     return CandidateQuestionsOut(
         candidate_name=assessment.candidate_name,
-        role_name=assessment.role.role_name,
+        role_name=(assessment.test_role or assessment.role).role_name,
         status=assessment.status,
         duration_minutes=assessment.duration_minutes,
         started_at=assessment.started_at,

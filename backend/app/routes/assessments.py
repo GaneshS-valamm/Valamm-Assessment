@@ -13,7 +13,9 @@ from ..schemas import (
     AssessmentCreatedOut,
     AssessmentListOut,
     AssessmentRowOut,
+    AssessmentUpdate,
     DashboardStats,
+    MessageOut,
     ResultOut,
 )
 from ..services import assessment_service, resume_service
@@ -52,6 +54,8 @@ def create_assessment(
         candidate_email=str(payload.candidate_email),
         role_id=payload.role_id,
         duration_minutes=payload.duration_minutes,
+        interviewer_1=payload.interviewer_1,
+        interviewer_2=payload.interviewer_2,
     )
     role = db.get(Role, assessment.role_id)
     return AssessmentCreatedOut(
@@ -67,6 +71,8 @@ def create_assessment(
         created_at=assessment.created_at,
         assessment_url=build_assessment_url(raw_token),
         question_count=assessment_service.question_count(db, assessment.question_paper_id),
+        interviewer_1=assessment.interviewer_1,
+        interviewer_2=assessment.interviewer_2,
     )
 
 
@@ -131,6 +137,39 @@ def get_assessment(
     assessment_id: int, db: Session = Depends(get_db), _: AdminUser = Depends(get_current_admin)
 ) -> AssessmentRowOut:
     return AssessmentRowOut(**assessment_service.to_row(db, _get_assessment(db, assessment_id)))
+
+
+@router.patch("/assessments/{assessment_id}", response_model=AssessmentRowOut)
+def update_assessment(
+    assessment_id: int,
+    payload: AssessmentUpdate,
+    db: Session = Depends(get_db),
+    _: AdminUser = Depends(get_current_admin),
+) -> AssessmentRowOut:
+    """Edit the interviewer assignments. Available at any time, including after submission."""
+    assessment = _get_assessment(db, assessment_id)
+    try:
+        assessment.interviewer_1 = (payload.interviewer_1 or "").strip() or None
+        assessment.interviewer_2 = (payload.interviewer_2 or "").strip() or None
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    db.refresh(assessment)
+    return AssessmentRowOut(**assessment_service.to_row(db, assessment))
+
+
+@router.delete("/assessments/{assessment_id}", response_model=MessageOut)
+def delete_assessment(
+    assessment_id: int,
+    db: Session = Depends(get_db),
+    _: AdminUser = Depends(get_current_admin),
+) -> MessageOut:
+    """Delete a candidate's assessment and all data hanging off it."""
+    assessment = _get_assessment(db, assessment_id)
+    name = assessment.candidate_name
+    assessment_service.delete_assessment(db, assessment)
+    return MessageOut(message=f"Deleted {name}'s record and all associated data.")
 
 
 @router.get("/assessments/{assessment_id}/results", response_model=ResultOut)

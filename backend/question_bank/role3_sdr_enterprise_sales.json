@@ -115,6 +115,14 @@
       "question_text": "What is your current CTC, and what is your expected CTC (fixed + variable, if applicable)?",
       "instructions": "Please give both figures, splitting fixed and variable where applicable.",
       "evaluation_criteria": "Informational, for compensation alignment only. Look for both figures given clearly with a fixed/variable split. Do not judge the candidate on the amounts themselves; flag to the interviewer only whether the expectation sits inside the approved band for this role."
+    },
+    {
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "When are you available for the interviews? Please mention the date and the time slot.",
+      "instructions": "For example: 12 March, 10:00-11:00 AM IST. Feel free to give more than one option.",
+      "evaluation_criteria": "Scheduling information. Look for at least one specific date with a time slot. Multiple options make it easier to arrange the panel. Note any constraint the candidate mentions (notice period, current-employer hours, time zone) and pass it to whoever books the interview.",
+      "question_order": 15
     }
   ]
 }

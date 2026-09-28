@@ -149,6 +149,8 @@ class AssessmentCreate(BaseModel):
     candidate_email: EmailStr
     role_id: int
     duration_minutes: int | None = Field(default=None, ge=5, le=480)
+    interviewer_1: str | None = Field(default=None, max_length=255)
+    interviewer_2: str | None = Field(default=None, max_length=255)
 
     @field_validator("candidate_name")
     @classmethod
@@ -159,12 +161,21 @@ class AssessmentCreate(BaseModel):
         return v
 
 
+class AssessmentUpdate(BaseModel):
+    """Fields the admin may change after an assessment exists."""
+
+    interviewer_1: str | None = Field(default=None, max_length=255)
+    interviewer_2: str | None = Field(default=None, max_length=255)
+
+
 class AssessmentCreatedOut(BaseModel):
     id: int
     candidate_name: str
     candidate_email: str
     role_id: int
     role_name: str
+    interviewer_1: str | None = None
+    interviewer_2: str | None = None
     question_paper_id: int
     question_paper_version: int
     status: AssessmentStatus
@@ -180,6 +191,11 @@ class AssessmentRowOut(BaseModel):
     candidate_email: str
     role_id: int
     role_name: str
+    applied_role_name: str
+    test_role_id: int | None = None
+    test_role_name: str | None = None
+    interviewer_1: str | None = None
+    interviewer_2: str | None = None
     question_paper_version: int
     status: AssessmentStatus
     duration_minutes: int | None
@@ -320,6 +336,12 @@ class CandidateAssessmentOut(BaseModel):
     interest_responded_at: UtcDT | None = None
     expires_at: UtcDT | None = None
     seconds_remaining: int | None = None
+    # Other roles the candidate may switch to if they decline this one.
+    other_roles: list[RoleOut] = []
+
+
+class RoleChoiceRequest(BaseModel):
+    role_id: int
 
 
 class CandidateQuestionsOut(BaseModel):
@@ -387,6 +409,10 @@ class ResultQuestionOut(BaseModel):
 
 class ResultOut(BaseModel):
     assessment_id: int
+    applied_role_name: str | None = None
+    test_role_name: str | None = None
+    interviewer_1: str | None = None
+    interviewer_2: str | None = None
     duration_minutes: int | None = None
     auto_submitted: bool = False
     answered_count: int = 0

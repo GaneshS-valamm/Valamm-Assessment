@@ -109,6 +109,8 @@ export const adminApi = {
     candidate_email: string;
     role_id: number;
     duration_minutes?: number | null;
+    interviewer_1?: string | null;
+    interviewer_2?: string | null;
   }) =>
     authed<GeneratedAssessment>('/api/admin/assessments', {
       method: 'POST',
@@ -125,6 +127,16 @@ export const adminApi = {
   },
 
   assessment: (id: number) => authed<AssessmentRow>(`/api/admin/assessments/${id}`),
+
+  /** Interviewer assignments, editable at any time. */
+  updateAssessment: (id: number, patch: { interviewer_1?: string | null; interviewer_2?: string | null }) =>
+    authed<AssessmentRow>(`/api/admin/assessments/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
+
+  deleteAssessment: (id: number) =>
+    authed<{ message: string }>(`/api/admin/assessments/${id}`, { method: 'DELETE' }),
   results: (id: number) => authed<AssessmentResult>(`/api/admin/assessments/${id}/results`),
 
   resumes: (params: Record<string, string | number | boolean | undefined> = {}) => {
@@ -228,6 +240,13 @@ export const candidateApi = {
 
   resumePreview: (token: string) =>
     request<ResumePreview>(`/api/assessments/${token}/resume/preview`),
+
+  /** Candidate declined the applied role and picked one of the others. */
+  chooseRole: (token: string, role_id: number) =>
+    request<CandidateAssessment>(`/api/assessments/${token}/role`, {
+      method: 'POST',
+      body: JSON.stringify({ role_id }),
+    }),
 
   declareInterest: (token: string, interested: boolean) =>
     request<CandidateAssessment>(`/api/assessments/${token}/interest`, {

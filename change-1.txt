@@ -1,0 +1,175 @@
+Update the existing assessment application with the following changes. Do not change unrelated functionality.
+
+### 1. Candidate Assessment Page
+
+On the assessment page shown to the candidate:
+
+* Remove the **number of questions** completely from the UI.
+* Remove the **time limit** completely from the UI.
+* Do not show any question-count or timer-related information anywhere on the candidate-facing page.
+* In the generated assessment, change the label **"Technical Role"** to simply **"Role"**.
+* Remove the text:
+  **"Let us know whether you would like to go ahead with this role"**
+  and replace the flow with the role-selection behavior described below.
+
+### 2. Generate Assessment Form – Interviewers
+
+In the **Generate Assessment** form, add two new fields/columns:
+
+* **Interviewer 1**
+* **Interviewer 2**
+
+Requirements:
+
+* Both fields must be visible in the Generate Assessment UI.
+* Both must be editable.
+* Admin must be able to edit both interviewer values at any time after the assessment has been created.
+* The updated interviewer values must be reflected in the admin dashboard/table.
+
+### 3. Role Rejection / Alternative Roles Flow
+
+When a candidate reaches the role decision and clicks **"No" / "Not this time"**:
+
+Show:
+
+**"Are you interested in other roles?"**
+
+Then display the **other 3 available roles** for that candidate.
+
+The candidate should be able to select one of those roles.
+
+After selecting an alternative role:
+
+* The assessment/questions must change to the questions associated with the selected role.
+* The candidate should then be able to take the assessment for that selected role.
+* The selected alternative role must be recorded as the **Test Role** for that candidate.
+
+If the candidate clicks **No** again instead of selecting/taking another role:
+
+Show:
+
+**"Thank you for your response."**
+
+Then end/close the assessment flow.
+
+### 4. Applied Role vs Test Role
+
+Create two separate role fields/columns for every candidate:
+
+#### Applied Role
+
+* This is the role the candidate originally applied for.
+* It must be stored when the candidate/application is created.
+* It should remain unchanged even if the candidate later chooses another role.
+
+#### Test Role
+
+* This is the role for which the candidate actually takes the assessment.
+* Initially, it can be the same as the Applied Role.
+* If the candidate rejects the original role and chooses one of the other 3 roles, update/store the selected role as the Test Role.
+* If they continue changing roles through the available flow, the Test Role should represent the latest role they actually selected/took the assessment for.
+
+These must be two **separate database fields/columns** and must never overwrite each other.
+
+Example:
+
+| Candidate   | Applied Role     | Test Role        |
+| ----------- | ---------------- | ---------------- |
+| Candidate A | Python Developer | Python Developer |
+| Candidate B | Python Developer | Data Analyst     |
+| Candidate C | Java Developer   | —                |
+
+### 5. Admin Dashboard
+
+Change the admin dashboard so that the information is displayed directly as columns in the main dashboard/table.
+
+Do **not** have a separate "Resumes" item replacing these details.
+
+The dashboard should show the relevant information as columns directly, including at minimum:
+
+* Candidate Name
+* Email/contact information if already present
+* Applied Role
+* Test Role
+* Interviewer 1
+* Interviewer 2
+* Existing assessment/status information
+* Resume information/status if already supported
+* Any other existing columns that are currently useful
+
+Keep the existing functionality unless specifically changed above.
+
+### 6. Admin Editing
+
+For every candidate row:
+
+* **Interviewer 1** must be editable at any time.
+* **Interviewer 2** must be editable at any time.
+* Applied Role should be displayed as the original applied role and should not accidentally change when Test Role changes.
+* Test Role should display the role the candidate actually selected/took the test for.
+* Make sure edits persist to the backend/database and remain after page refresh.
+
+### 7. Delete Candidate
+
+At the **end of every row** in the admin dashboard, add a visible:
+
+**Delete**
+
+button.
+
+When Admin clicks Delete:
+
+* Ask for confirmation before deleting.
+* If confirmed, delete that candidate/application and its associated assessment data according to the existing application's data relationships.
+* Remove the row from the dashboard immediately after successful deletion.
+* Do not leave orphaned assessment/role data behind if the existing data model requires cleanup.
+
+### 8. Important Data/Logic Requirements
+
+Make sure the implementation is consistent across:
+
+* Database/schema
+* Backend APIs
+* Assessment generation
+* Candidate assessment flow
+* Role-selection flow
+* Admin dashboard
+* Admin editing
+* Delete functionality
+
+Do not implement these as UI-only changes. The Applied Role, Test Role, Interviewer 1, and Interviewer 2 values must be properly persisted.
+
+### 9. Preserve Existing Functionality
+
+Do not unnecessarily redesign the application.
+
+Only make the changes required above and preserve:
+
+* Existing candidate registration/application flow
+* Existing resume functionality
+* Existing assessment generation
+* Existing question generation
+* Existing admin authentication
+* Existing scoring/results functionality
+* Existing APIs and database behavior unless changes are required for the new fields/flow
+
+Before finishing, verify the complete flow:
+
+1. Admin creates an assessment.
+2. Admin enters Interviewer 1 and Interviewer 2(not madatory)
+3. Candidate sees only **Role**, with no question count and no time limit.
+4. Candidate rejects the original role.
+5. Candidate is asked whether they are interested in other roles.
+6. Three alternative roles are displayed.
+7. Candidate selects another role.
+8. Questions for the selected role are shown.
+9. Test Role is updated while Applied Role remains unchanged.
+10. Candidate can reject again.
+11. If they reject again, show **"Thank you for your response."** and end the flow.
+12. Admin dashboard shows Applied Role and Test Role as separate columns.
+13. Admin dashboard shows Interviewer 1 and Interviewer 2.
+14. Admin can edit both interviewers at any time.
+15. Admin can delete any candidate using the Delete button at the end of the row.
+16. Refresh the admin page and verify all persisted values remain correct.
+
+First inspect the existing codebase and data model, then implement the changes using the application's existing architecture and conventions. Do not create duplicate tables, APIs, or components when existing ones can be extended.

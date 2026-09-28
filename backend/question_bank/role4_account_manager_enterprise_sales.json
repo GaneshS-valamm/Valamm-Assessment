@@ -114,6 +114,14 @@
       "marks": 1,
       "question_text": "What is your current notice period, current CTC and expected CTC (fixed + variable)?",
       "evaluation_criteria": "Informational, for offer planning. Look for the notice period and both CTC figures with a fixed/variable split. Do not judge the candidate on the amounts; note only whether the expectation sits inside the approved band."
+    },
+    {
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "When are you available for the interviews? Please mention the date and the time slot.",
+      "instructions": "For example: 12 March, 10:00-11:00 AM IST. Feel free to give more than one option.",
+      "evaluation_criteria": "Scheduling information. Look for at least one specific date with a time slot. Multiple options make it easier to arrange the panel. Note any constraint the candidate mentions (notice period, current-employer hours, time zone) and pass it to whoever books the interview.",
+      "question_order": 16
     }
   ]
 }

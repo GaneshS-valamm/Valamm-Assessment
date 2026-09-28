@@ -10,6 +10,8 @@ export default function GenerateAssessment() {
   const [email, setEmail] = useState('');
   const [roleId, setRoleId] = useState('');
   const [duration, setDuration] = useState('60');
+  const [interviewer1, setInterviewer1] = useState('');
+  const [interviewer2, setInterviewer2] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<GeneratedAssessment | null>(null);
@@ -35,6 +37,8 @@ export default function GenerateAssessment() {
         candidate_email: email.trim(),
         role_id: Number(roleId),
         duration_minutes: duration ? Number(duration) : null,
+        interviewer_1: interviewer1.trim() || null,
+        interviewer_2: interviewer2.trim() || null,
       });
       setResult(created);
       setResume(null);
@@ -43,6 +47,8 @@ export default function GenerateAssessment() {
       setEmail('');
       setRoleId('');
       setDuration('60');
+      setInterviewer1('');
+      setInterviewer2('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate the assessment.');
     } finally {
@@ -108,7 +114,7 @@ export default function GenerateAssessment() {
 
           <div>
             <label className="label" htmlFor="role">
-              Technical Role <span className="text-rose-500">*</span>
+              Role <span className="text-rose-500">*</span>
             </label>
             <select
               id="role"
@@ -125,6 +131,36 @@ export default function GenerateAssessment() {
               ))}
             </select>
           </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="label" htmlFor="int1">
+                Interviewer 1
+              </label>
+              <input
+                id="int1"
+                className="input"
+                value={interviewer1}
+                onChange={(e) => setInterviewer1(e.target.value)}
+                placeholder="e.g. Ganesh S"
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="int2">
+                Interviewer 2
+              </label>
+              <input
+                id="int2"
+                className="input"
+                value={interviewer2}
+                onChange={(e) => setInterviewer2(e.target.value)}
+                placeholder="e.g. Priya R"
+              />
+            </div>
+          </div>
+          <p className="-mt-2 text-xs text-slate-500">
+            Optional now &mdash; both can be edited at any time from the Candidates table.
+          </p>
 
           <div>
             <label className="label" htmlFor="duration">
@@ -211,7 +247,9 @@ export default function GenerateAssessment() {
               <dl className="space-y-2.5 border-t border-slate-200 pt-4 text-sm">
                 <Row label="Candidate Name" value={result.candidate_name} />
                 <Row label="Candidate Email" value={result.candidate_email} />
-                <Row label="Selected Role" value={result.role_name} />
+                <Row label="Role" value={result.role_name} />
+                <Row label="Interviewer 1" value={result.interviewer_1 || '—'} />
+                <Row label="Interviewer 2" value={result.interviewer_2 || '—'} />
                 <Row
                   label="Assessment Status"
                   value={<StatusBadge status={result.status} />}

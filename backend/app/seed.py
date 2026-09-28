@@ -34,6 +34,9 @@ OPTION_LABELS = ["A", "B", "C", "D"]
 # so existing installations need these applied explicitly. Idempotent and safe to re-run.
 ADDED_COLUMNS: dict[str, dict[str, str]] = {
     "assessments": {
+        "test_role_id": "INTEGER NULL",
+        "interviewer_1": "VARCHAR(255) NULL",
+        "interviewer_2": "VARCHAR(255) NULL",
         "resume_confirmed_at": "{ts} NULL",
         "interest_response": "VARCHAR(20) NOT NULL DEFAULT 'PENDING'",
         "interest_responded_at": "{ts} NULL",

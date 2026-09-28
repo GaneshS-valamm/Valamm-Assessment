@@ -2,7 +2,7 @@
   "role_name": "Enterprise Sales Manager – Agentic AI Solutions",
   "role_description": "Owns full-cycle enterprise pursuit and closure of Agentic AI solutions. Bengaluru, work-from-office.",
   "paper_title": "Candidate Screening Form – Enterprise Sales Manager, Agentic AI Solutions",
-  "paper_notes": "Transcribed verbatim from Enterprise_Sales_Manager_Candidate_Screening_Form.docx. All questions are free-text. Marks are not used - this is a screening form, reviewed by a human, not a scored test.",
+  "paper_notes": "Questions are identical to the Account Manager - Enterprise Sales screening form, as requested, transcribed from Account_Manager_Candidate_Screening_Form (3).docx with the additional AI-products question at position 12. All questions are free-text; marks are not used.",
   "questions": [
     {
       "question_order": 1,
@@ -15,74 +15,75 @@
       "question_order": 2,
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "This role is based in Bengaluru and is a work-from-office (WFO) position. Are you comfortable with this, and would you be able to work from our Bengaluru office on a daily basis?",
-      "evaluation_criteria": "Screening gate. Look for an unambiguous yes. Treat a clear no, or a hybrid-only expectation, as a knock-out for this role and flag it regardless of the rest of the form."
+      "question_text": "This role is based in Bengaluru and is a work-from-office (WFO) position, with client travel as needed. Are you comfortable with this?",
+      "evaluation_criteria": "Screening gate covering two things: daily office attendance and willingness to travel to clients. Look for a clear yes to both. Flag any constraint on travel, since the role requires it."
     },
     {
       "question_order": 3,
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "What is your educational background? If you don't have a CS / engineering degree, how have you built your technical depth?",
-      "evaluation_criteria": "A CS or engineering degree is not mandatory for this role. Where it is absent, look for a credible substitute: certifications, self-study, time spent with technical products, or the ability to hold a technical conversation evidenced elsewhere in the form (see questions 8 and 10)."
+      "question_text": "What is your educational background? Please mention your degree and specialization.",
+      "instructions": "This role requires an engineering degree (CS, IT, ECE or related).",
+      "evaluation_criteria": "Stated requirement for this role: an engineering degree in CS, IT, ECE or a related discipline. Record the degree and specialisation, and flag clearly if it is absent so the hiring manager can decide whether to waive it."
     },
     {
       "question_order": 4,
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "How many years of full-cycle enterprise sales experience do you have selling complex technology to mid to large enterprises?",
-      "evaluation_criteria": "Look for full-cycle ownership (prospect to close), not just one stage. Check the figure is consistent with the deal stories given later. Enterprise and mid-market experience counts; pure SMB or channel-only experience is weaker for this role."
+      "question_text": "How many years of enterprise B2B sales experience do you have, and how many of those were spent selling Cybersecurity, AI Security, Cloud or IAM solutions?",
+      "evaluation_criteria": "Two figures matter, and the second matters more: total enterprise B2B years, and years specifically in Cybersecurity, AI Security, Cloud or IAM. Check both against the products and deals described in questions 6, 7 and 10."
     },
     {
       "question_order": 5,
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "How would you define your current role, and how do you see yourself fitting into this Enterprise Sales Manager position at Valamm.AI?",
-      "evaluation_criteria": "Two parts, both needed: an accurate description of what they do today, and a considered link to this role showing they have read what it involves. Credit realistic self-assessment including gaps. Deduct for generic ambition statements that would fit any advert."
+      "question_text": "How would you define your current role, and how do you see yourself fitting into this Account Manager position at Valamm.AI?",
+      "evaluation_criteria": "Two parts, both needed: an accurate description of what they do today, and a considered link to this role. Look for an understanding that account management here means retention, renewal and expansion of existing enterprise relationships, not only new-logo hunting."
     },
     {
       "question_order": 6,
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "Did you carry a quota? What were your targets over the last two years, how did you perform against them, and what was your largest deal size?",
-      "evaluation_criteria": "Look for real figures: quota value, attainment percentage per year, and largest single deal. Credit candidates who know their own numbers without prompting and whose figures are consistent across two years. Treat 'always exceeded target' with no numbers as a weak answer."
+      "question_text": "Which Cybersecurity, AI Security, Cloud or IAM products have you sold, and to which Indian enterprises or industries?",
+      "instructions": "For example: SIEM, endpoint, IAM / PAM, cloud security, AWS / Azure / GCP; BFSI, manufacturing, IT/ITeS.",
+      "evaluation_criteria": "Look for named product categories actually sold and named industries or accounts in the Indian market. Depth in one or two relevant segments beats a list covering everything. Credit answers that make the claim checkable."
     },
     {
       "question_order": 7,
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "How do you build your own pipeline when no leads are handed to you? Describe your prospecting and qualification approach with a real example.",
-      "instructions": "Please use a real example.",
-      "evaluation_criteria": "Tests whether they can self-source. Look for a repeatable method: how accounts are chosen, the research and trigger used, channels and cadence, and an explicit qualification bar. The example should be specific and recent. Deduct where pipeline has only ever arrived from marketing or inbound."
+      "question_text": "Pick one product you have sold. In simple words, explain how it works technically and what problem it solves for the customer.",
+      "instructions": "Please answer in plain, simple language and avoid jargon or buzzwords.",
+      "evaluation_criteria": "The technical-comprehension question. A good answer explains the mechanism in plain language - what the product actually does, where it sits in the customer's environment - and ties it to a concrete business problem. Deduct for a recited marketing pitch, for jargon substituting for understanding, or for an explanation that could not survive a question from a customer's engineer."
     },
     {
       "question_order": 8,
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "In simple words, what is an agentic AI solution? Give one example of where it adds value in an enterprise workflow, and one task it should not be trusted to run on its own.",
-      "instructions": "Please answer in plain, simple language and avoid jargon or buzzwords.",
-      "evaluation_criteria": "The key technical-comprehension question. A good answer conveys that an agent plans multi-step work, uses tools or systems, and acts toward a goal within guardrails - distinct from a chatbot or a fixed rules engine. The value example should be a concrete workflow. The 'should not be trusted' half matters most: it shows they understand autonomy risk and human-in-the-loop, which is what security and IT buyers will probe. Deduct for buzzword definitions or for claiming an agent can be trusted with anything."
+      "question_text": "Have you sold to Global (non-Indian) enterprise accounts? Please describe briefly.",
+      "evaluation_criteria": "Nice to have. Credit named markets or accounts, time-zone coverage, and comfort with international enterprise buying processes. An honest no with relevant adjacent experience is acceptable."
     },
     {
       "question_order": 9,
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "What AWS or Azure exposure do you have?",
-      "instructions": "For example: a certification (current or lapsed), working with AWS / Microsoft partner companies, or hands-on / self-learning.",
-      "evaluation_criteria": "Nice to have rather than essential. Credit any genuine exposure - certification (even lapsed), co-selling with a cloud partner, marketplace experience, or self-directed hands-on learning. An honest 'limited, but here is what I have done' is better than an overstated claim."
+      "question_text": "Describe how you defined an ICP (ideal customer profile) and built a target-account list for it. What outreach did you run against that list, and what were the results?",
+      "instructions": "For example: ABM, LinkedIn / social selling, email, partner-led or event-led outreach.",
+      "evaluation_criteria": "Tests method rather than activity. Look for explicit ICP criteria (industry, size, tech stack, trigger), how the list was built and prioritised, the channels and cadence run against it, and measurable results - meetings, pipeline, conversion. Deduct for a list handed to them by someone else, or outreach described with no outcome."
     },
     {
       "question_order": 10,
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "A customer's IT or security team asks how an AI product will fit their existing systems, where their data will sit, and what access controls apply. How would you handle this conversation?",
-      "evaluation_criteria": "Tests behaviour in the conversation that most often stalls AI deals. Look for: treating the questions as legitimate rather than rebutting them, separating integration from data residency from access control, naming concrete mitigations (least privilege, human approval, audit logging, private or in-tenant deployment, no-training-on-customer-data, DPA, SOC 2), bringing in a solutions architect or security lead rather than bluffing, and converting security into a stakeholder. Deduct for dismissing the concern, over-promising, or answering only with reassurance."
+      "question_text": "Which CXO-level buyers (CEO, CISO, CTO, CIO) have you sold to directly? Walk us through one deal from first contact to closure – stakeholders, commercials, negotiation.",
+      "evaluation_criteria": "Highest-signal question on this form. Look for direct CXO access (particularly CISO for this product set) and a coherent end-to-end deal narrative: how first contact was made, the buying committee, the commercial structure, how negotiation and procurement were handled, and who actually decided. Deduct where CXO contact was only ever via a manager, or the story lacks commercials and negotiation detail."
     },
     {
       "question_order": 11,
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "Walk us through one enterprise deal you closed – from first contact to close. Who was on the buying committee (business, IT, security, procurement), and who really made the decision?",
-      "evaluation_criteria": "Look for genuine multi-threading: several named stakeholder types, who championed it, who could block it, and a clear identification of the economic buyer as distinct from the loudest voice. Credit specifics on commercials, procurement and security review, and on how the deal was actually driven to signature. Deduct for a single-threaded story or one where the candidate cannot say who decided."
+      "question_text": "What were your annual / quarterly revenue targets over the last two years, and how did you perform against them? What was your largest deal size?",
+      "evaluation_criteria": "Look for real figures across two years - quota, attainment, and largest single deal - and internal consistency with the deals described elsewhere. Credit candidates who know their own numbers without prompting. Treat unquantified claims of over-achievement as weak."
     },
     {
       "question_order": 12,
@@ -90,22 +91,37 @@
       "marks": 1,
       "question_text": "Have you sold AI products or software into enterprises? Which industries do you know best?",
       "instructions": "For example: BFSI, Manufacturing, Healthcare, Retail, IT, Education.",
-      "evaluation_criteria": "Look for concrete AI or software products sold, the buyer personas reached, and named industries with real depth rather than a list of every vertical. Sector knowledge relevant to our target market is a plus; honesty about where their depth genuinely lies is worth more than breadth claimed without evidence."
+      "evaluation_criteria": "Look for concrete AI or software products sold, the buyer personas reached, and named industries with genuine depth rather than a list of every vertical. Honesty about where their depth actually lies is worth more than unevidenced breadth."
     },
     {
       "question_order": 13,
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "Tell me about a recent deal you lost, and why.",
-      "instructions": "For example: lost to a competitor, pricing challenge, budget freeze, stuck in security review, or something else.",
-      "evaluation_criteria": "Tests candour and diagnosis. Look for a real, recent loss owned without deflection, an honest root cause, and a specific change made afterwards. Deduct for blaming product, pricing or the prospect entirely, for a trivial example, or for claiming no recent losses."
+      "question_text": "Tell me about an account where you drove a renewal, upsell or cross-sell. What did you do?",
+      "evaluation_criteria": "Directly tests the core of this role. Look for a named account, the state it was in, what the candidate personally did to secure the renewal or expansion, how value was demonstrated, which stakeholders were involved, and the commercial outcome. Credit expansion earned off demonstrated value rather than a discount."
     },
     {
       "question_order": 14,
       "question_type": "SUBJECTIVE",
       "marks": 1,
-      "question_text": "What is your current notice period, and what are your current and expected CTC (fixed + variable)?",
-      "evaluation_criteria": "Informational, for offer planning. Look for a clear notice period and both CTC figures with a fixed/variable split. Do not judge the candidate on the amounts; note only whether the expectation sits inside the approved band."
+      "question_text": "Tell me about a recent deal you lost, and why.",
+      "instructions": "For example: lost to a competitor, pricing challenge, budget freeze, or something else.",
+      "evaluation_criteria": "Tests candour and diagnosis. Look for a real, recent loss owned without deflection, an honest root cause, and a specific change made afterwards. Deduct for blaming product, pricing or the customer entirely, or for claiming no recent losses."
+    },
+    {
+      "question_order": 15,
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "What is your current notice period, current CTC and expected CTC (fixed + variable)?",
+      "evaluation_criteria": "Informational, for offer planning. Look for the notice period and both CTC figures with a fixed/variable split. Do not judge the candidate on the amounts; note only whether the expectation sits inside the approved band."
+    },
+    {
+      "question_type": "SUBJECTIVE",
+      "marks": 1,
+      "question_text": "When are you available for the interviews? Please mention the date and the time slot.",
+      "instructions": "For example: 12 March, 10:00-11:00 AM IST. Feel free to give more than one option.",
+      "evaluation_criteria": "Scheduling information. Look for at least one specific date with a time slot. Multiple options make it easier to arrange the panel. Note any constraint the candidate mentions (notice period, current-employer hours, time zone) and pass it to whoever books the interview.",
+      "question_order": 16
     }
   ]
 }

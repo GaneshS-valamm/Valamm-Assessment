@@ -58,7 +58,13 @@ export default function AssessmentResults() {
 
       {/* Candidate + assessment metadata */}
       <div className="card grid gap-x-8 gap-y-3 p-6 sm:grid-cols-2 lg:grid-cols-3">
-        <Meta label="Applied Role" value={result.role_name} />
+        <Meta label="Applied Role" value={result.applied_role_name || result.role_name} />
+        <Meta
+          label="Test Role"
+          value={result.test_role_name || result.applied_role_name || result.role_name}
+        />
+        <Meta label="Interviewer 1" value={result.interviewer_1 || '—'} />
+        <Meta label="Interviewer 2" value={result.interviewer_2 || '—'} />
         <Meta label="Assessment ID" value={`#${result.assessment_id}`} />
         <Meta
           label="Screening Form"

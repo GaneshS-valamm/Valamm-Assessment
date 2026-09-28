@@ -27,6 +27,11 @@ export interface AssessmentRow {
   candidate_email: string;
   role_id: number;
   role_name: string;
+  applied_role_name: string;
+  test_role_id: number | null;
+  test_role_name: string | null;
+  interviewer_1: string | null;
+  interviewer_2: string | null;
   question_paper_version: number;
   status: AssessmentStatus;
   duration_minutes: number | null;
@@ -57,6 +62,8 @@ export interface AssessmentList {
 
 export interface GeneratedAssessment {
   id: number;
+  interviewer_1: string | null;
+  interviewer_2: string | null;
   candidate_name: string;
   candidate_email: string;
   role_id: number;
@@ -155,6 +162,7 @@ export interface CandidateAssessment {
   interest_responded_at: string | null;
   expires_at: string | null;
   seconds_remaining: number | null;
+  other_roles: Role[];
 }
 
 export interface CandidateQuestions {
@@ -209,6 +217,10 @@ export interface ResultQuestion {
 
 export interface AssessmentResult {
   assessment_id: number;
+  applied_role_name: string | null;
+  test_role_name: string | null;
+  interviewer_1: string | null;
+  interviewer_2: string | null;
   duration_minutes: number | null;
   auto_submitted: boolean;
   answered_count: number;

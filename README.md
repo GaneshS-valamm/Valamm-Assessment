@@ -171,7 +171,7 @@ Assesment/
 | `question_papers` | versioned papers per role | unique (`role_id`, `version`) |
 | `questions` | objective + subjective questions | indexed (`question_paper_id`, `question_order`) |
 | `question_options` | MCQ options + answer key | unique (`question_id`, `option_order`) |
-| `assessments` | one per candidate/link (plus `resume_confirmed_at`, `interest_response`, `interest_responded_at`) | unique `unique_token_hash`; indexes on `role_id`, `status`, `candidate_email`, `created_at` |
+| `assessments` | one per candidate/link. `role_id` is the **applied role** and never changes; `test_role_id` is the role actually answered for. Plus `interviewer_1`, `interviewer_2`, `resume_confirmed_at`, `interest_response`, `interest_responded_at` | unique `unique_token_hash`; indexes on `role_id`, `status`, `candidate_email`, `created_at` |
 | `assessment_answers` | autosaved drafts + final answers | unique (`assessment_id`, `question_id`) |
 | `assessment_evaluations` | subjective marks + feedback | unique (`assessment_id`, `question_id`), `awarded_marks >= 0` |
 | `candidate_resumes` | resume metadata + storage key (one row per version, with `uploaded_by_type` / `uploaded_by_admin_id`) | unique (`assessment_id`, `version`), unique `storage_key`, `file_size > 0`; indexes on (`assessment_id`, `is_current`), `resume_status`, `uploaded_at`, `candidate_email` |
@@ -227,6 +227,7 @@ deleted, and submission sets `is_locked` on every version of that assessment's r
 | GET | `/api/assessments/{token}/resume/download` | candidate token (view/download own resume) |
 | POST | `/api/assessments/{token}/resume/confirm` | candidate token (resume reviewed, accepted as-is) |
 | POST | `/api/assessments/{token}/interest` | candidate token (`{"interested": true\|false}`) |
+| POST | `/api/assessments/{token}/role` | candidate token (switch to one of the other roles) |
 | POST | `/api/admin/assessments/{assessment_id}/resume` | admin (attach a resume for the candidate) |
 | GET | `/api/admin/resumes/{resume_id}/preview` | admin (inline view: PDF flag, or DOCX as text) |
 | GET | `/api/assessments/{token}/resume/preview` | candidate token (same, for their own resume) |
@@ -282,7 +283,7 @@ questions from the recruitment team, with a prominent note that there are no rig
 and that answers should be written by the candidate rather than generated with AI tools.
 
 ```
-admin generates link  ->  admin attaches resume  ->  candidate opens link
+admin generates link (+ interviewers)  ->  admin attaches resume  ->  candidate opens link
                                                           |
                                       Step 1: review the resume on file
                                       (confirm as-is, or upload a new version)
@@ -290,11 +291,44 @@ admin generates link  ->  admin attaches resume  ->  candidate opens link
                                       Step 2: "go ahead with this role?"
                                             /                                                               Yes                            No
                                         |                              |
-                              questions released          "Thank you for your response"
-                              timer starts                     link closed
-                                        |                   (final, 409 on retry)
-                        answers typed -> sent, or the timer sends them
+                              questions released        "Are you interested in other roles?"
+                              timer starts                    the other 3 are listed
+                                        |                      /                                          answers typed -> sent           picks one            "None of these"
+                        or the timer sends them          |                          |
+                                                 that role's questions    "Thank you for your
+                                                 Test Role updated,        response" - closed
+                                                 Applied Role unchanged
 ```
+
+### Applied Role vs Test Role
+
+Two separate columns that never overwrite each other:
+
+* **Applied Role** (`role_id`) — the role the link was generated for. Fixed at creation.
+* **Test Role** (`test_role_id`) — the role whose questions the candidate actually answered. Starts
+  equal to the applied role, and changes only when the candidate picks a different one after
+  declining.
+
+Switching the test role re-points the pinned question paper and clears any answers already saved,
+since those answers belong to the previous paper's question ids. The resume, interviewers, applied
+role and the link itself are untouched. Both columns appear on the dashboard and the Candidates
+table, and a switched Test Role is highlighted.
+
+### Interviewers
+
+`interviewer_1` and `interviewer_2` are set on the Generate form (both optional) and are editable
+inline in the Candidates table at any time, including after submission — edits save on blur and
+persist. They are never sent to the candidate.
+
+### Deleting a candidate
+
+Each row in the Candidates table ends with a **Delete** button. It asks for confirmation, spelling
+out what will be removed, then deletes the assessment along with its answers, reviewer notes, every
+resume version and the stored resume files. The link stops working immediately.
+
+> This overrides the earlier rule that submitted assessments are never deleted through ordinary
+> admin actions. It was requested explicitly; there is no undo, so the confirmation dialog is the
+> only safeguard.
 
 ### Timer
 
@@ -355,10 +389,16 @@ truth: the JSON files in `backend/question_bank/`.
 
 | Role | Source document | Questions |
 | --- | --- | --- |
-| Enterprise Sales Manager – Agentic AI Solutions | `Enterprise_Sales_Manager_Candidate_Screening_Form.docx` | 14 |
-| AWS Partner Operations & Marketplace Specialist | `AWS_Partner_Ops_Marketplace_Candidate_Screening_Form (1).docx` | 14 |
-| Sales Development Representative (SDR) – Enterprise Sales | `SDR_Candidate_Screening_Form_1.docx` | 14 |
-| Account Manager – Enterprise Sales | `Account_Manager_Candidate_Screening_Form (3).docx` | 15 |
+| Enterprise Sales Manager – Agentic AI Solutions | Account Manager form (questions are deliberately identical) | 16 |
+| AWS Partner Operations & Marketplace Specialist | `AWS_Partner_Ops_Marketplace_Candidate_Screening_Form (1).docx` | 15 |
+| Sales Development Representative (SDR) – Enterprise Sales | `SDR_Candidate_Screening_Form_1.docx` | 15 |
+| Account Manager – Enterprise Sales | `Account_Manager_Candidate_Screening_Form (3).docx` | 16 |
+
+Every paper ends with the same closing question: *"When are you available for the interviews? Please
+mention the date and the time slot."*
+
+The Enterprise Sales Manager paper carries the **same questions as the Account Manager paper**, as
+requested, rather than the questions from its own source document.
 
 **Every question is free-text** — there are no multiple-choice options anywhere, and candidates type
 every answer.
@@ -407,7 +447,26 @@ All six acceptance workflows were executed against the running application:
 | 5 — Admin results | Pass. Objective auto-scored 15/20 (3 of 4 correct); selected vs. correct option shown per question; full subjective text shown; evaluations saved and re-read; final score stayed `Pending Evaluation` until all four were marked, then resolved to 78/100 = 78% |
 | 6 — Persistence | Pass. After stopping and restarting the backend, all assessments, links, answers, timestamps and evaluations were still present and correct |
 
-### Real screening forms, timer, previews (35/35 checks)
+### Roles, interviewers, role switching, delete (33/33 checks)
+
+| Check | Result |
+| --- | --- |
+| Every paper ends with the availability question | Pass, all four |
+| Enterprise Sales Manager questions identical to Account Manager | Pass, 16 vs 16 |
+| Interviewers saved at creation | Pass |
+| Interviewers editable later, one cleared | Pass, persists across a fresh read; 401 without auth |
+| Exactly 3 other roles offered on decline | Pass, applied role excluded |
+| Switching serves the new role's paper | Pass |
+| Applied Role unchanged, Test Role updated | Pass |
+| Interviewers survive the switch | Pass |
+| Declining everything closes the link | Pass, 403 on questions afterwards |
+| Answers work on the switched paper | Pass, 15/15 saved and shown |
+| Delete requires auth, then removes the row | Pass, 401 then 200; list count drops |
+| Deleted link stops working, resume row gone | Pass, 404; resume count 0 |
+| Deleting twice is a clean 404 | Pass |
+| Submitted records deletable with their answers | Pass |
+
+### Real screening forms, timer, previews (34/34 checks)
 
 | Check | Result |
 | --- | --- |

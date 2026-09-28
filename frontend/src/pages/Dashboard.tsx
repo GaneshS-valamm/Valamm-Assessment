@@ -105,7 +105,10 @@ export default function Dashboard() {
               <thead className="bg-slate-50">
                 <tr>
                   <th className="th">Candidate</th>
-                  <th className="th">Technical Role</th>
+                  <th className="th">Applied Role</th>
+                  <th className="th">Test Role</th>
+                  <th className="th">Interviewer 1</th>
+                  <th className="th">Interviewer 2</th>
                   <th className="th">Status</th>
                   <th className="th">Created</th>
                   <th className="th">Submitted</th>
@@ -119,7 +122,24 @@ export default function Dashboard() {
                       <div className="font-semibold text-slate-900">{r.candidate_name}</div>
                       <div className="text-xs text-slate-500">{r.candidate_email}</div>
                     </td>
-                    <td className="td max-w-xs">{r.role_name}</td>
+                    <td className="td max-w-[180px]">{r.applied_role_name}</td>
+                    <td className="td max-w-[180px]">
+                      {r.test_role_name ? (
+                        <span
+                          className={
+                            r.test_role_name === r.applied_role_name
+                              ? ''
+                              : 'font-semibold text-violet-800'
+                          }
+                        >
+                          {r.test_role_name}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
+                    </td>
+                    <td className="td text-xs">{r.interviewer_1 || '—'}</td>
+                    <td className="td text-xs">{r.interviewer_2 || '—'}</td>
                     <td className="td">
                       <StatusBadge status={r.status} />
                     </td>

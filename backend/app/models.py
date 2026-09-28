@@ -193,6 +193,13 @@ class Assessment(Base):
         nullable=False,
         default=EvaluationStatus.PENDING,
     )
+    # The role the candidate actually answers questions for. Starts equal to role_id
+    # (the applied role) and changes only if the candidate picks a different role.
+    # role_id is never overwritten, so the applied role is always recoverable.
+    test_role_id: Mapped[int | None] = mapped_column(ForeignKey("roles.id", ondelete="RESTRICT"))
+    # Interviewers assigned by the admin; editable at any time, never candidate-visible.
+    interviewer_1: Mapped[str | None] = mapped_column(String(255))
+    interviewer_2: Mapped[str | None] = mapped_column(String(255))
     # Candidate reviewed the resume on file (confirmed it, or uploaded a replacement).
     resume_confirmed_at: Mapped[datetime | None] = mapped_column(TS)
     # Candidate's declared interest in the role - the paper is released only on INTERESTED.
@@ -205,7 +212,8 @@ class Assessment(Base):
     interest_responded_at: Mapped[datetime | None] = mapped_column(TS)
     updated_at: Mapped[datetime] = mapped_column(TS, nullable=False, default=utcnow, onupdate=utcnow)
 
-    role: Mapped[Role] = relationship()
+    role: Mapped[Role] = relationship(foreign_keys=[role_id])
+    test_role: Mapped[Role | None] = relationship(foreign_keys=[test_role_id])
     paper: Mapped[QuestionPaper] = relationship()
     answers: Mapped[list[AssessmentAnswer]] = relationship(
         back_populates="assessment", cascade="all, delete-orphan"
@@ -216,6 +224,9 @@ class Assessment(Base):
     resumes: Mapped[list[CandidateResume]] = relationship(
         back_populates="assessment",
         order_by="CandidateResume.version.desc()",
+        # Deleting an assessment must delete its resume rows, not orphan them by
+        # nulling the foreign key (which the column forbids anyway).
+        cascade="all, delete-orphan",
     )
 
 
