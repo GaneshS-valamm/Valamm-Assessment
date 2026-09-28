@@ -128,9 +128,11 @@ export default function Dashboard() {
                     <td className="td whitespace-nowrap text-xs">{formatDateTime(r.created_at)}</td>
                     <td className="td whitespace-nowrap text-xs">{formatDateTime(r.submitted_at)}</td>
                     <td className="td whitespace-nowrap">
-                      {r.status === 'SUBMITTED'
-                        ? `${r.objective_score ?? 0} / ${r.objective_max}`
-                        : '—'}
+                      {r.status !== 'SUBMITTED'
+                        ? '—'
+                        : r.objective_max === 0
+                          ? 'n/a'
+                          : `${r.objective_score ?? 0} / ${r.objective_max}`}
                     </td>
                     <td className="td">
                       <EvaluationBadge status={r.evaluation_status} />

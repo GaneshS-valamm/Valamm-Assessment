@@ -83,7 +83,12 @@ export default function AssessmentResults() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <ScoreCard
           label="Objective Score"
-          value={`${result.objective_score} / ${result.objective_max}`}
+          value={
+            result.objective_max === 0
+              ? 'Not applicable'
+              : `${result.objective_score} / ${result.objective_max}`
+          }
+          sub={result.objective_max === 0 ? 'This paper has no multiple-choice questions' : undefined}
           tone="bg-brand-50 text-brand-700"
         />
         <ScoreCard

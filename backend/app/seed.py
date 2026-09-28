@@ -8,13 +8,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sqlalchemy import func, inspect, select, text
+from sqlalchemy import delete, func, inspect, select, text
 from sqlalchemy.orm import Session
 
 from .config import BACKEND_DIR, settings
 from .database import SessionLocal, engine, init_db
 from .models import (
     AdminUser,
+    Assessment,
     Question,
     QuestionOption,
     QuestionPaper,
@@ -96,7 +97,90 @@ def seed_admin(db: Session) -> None:
     db.commit()
 
 
+def _spec_fingerprint(spec: dict) -> tuple:
+    """Content identity of a paper as defined in its JSON file."""
+    return (
+        spec["paper_title"],
+        tuple(
+            (
+                int(q["question_order"]),
+                q["question_type"],
+                int(q["marks"]),
+                q["question_text"].strip(),
+                q.get("instructions") or "",
+                tuple(q.get("options") or ()),
+                int(q.get("correct_option_order") or 0),
+            )
+            for q in sorted(spec["questions"], key=lambda x: int(x["question_order"]))
+        ),
+    )
+
+
+def _paper_fingerprint(db: Session, paper: QuestionPaper) -> tuple:
+    """Content identity of a paper as it currently exists in the database."""
+    questions = db.scalars(
+        select(Question)
+        .where(Question.question_paper_id == paper.id)
+        .order_by(Question.question_order)
+    ).all()
+    rows = []
+    for q in questions:
+        options = db.scalars(
+            select(QuestionOption)
+            .where(QuestionOption.question_id == q.id)
+            .order_by(QuestionOption.option_order)
+        ).all()
+        correct = next((o.option_order for o in options if o.is_correct), 0)
+        rows.append(
+            (
+                q.question_order,
+                q.question_type.value,
+                q.marks,
+                q.question_text.strip(),
+                q.instructions or "",
+                tuple(o.option_text for o in options),
+                correct,
+            )
+        )
+    return (paper.paper_title, tuple(rows))
+
+
+def _add_questions(db: Session, paper: QuestionPaper, spec: dict) -> None:
+    for q in spec["questions"]:
+        qtype = QuestionType(q["question_type"])
+        question = Question(
+            question_paper_id=paper.id,
+            question_text=q["question_text"],
+            question_type=qtype,
+            marks=int(q["marks"]),
+            question_order=int(q["question_order"]),
+            is_required=bool(q.get("is_required", True)),
+            instructions=q.get("instructions"),
+            evaluation_criteria=q.get("evaluation_criteria"),
+        )
+        db.add(question)
+        db.flush()
+
+        if qtype == QuestionType.OBJECTIVE:
+            correct = int(q["correct_option_order"])
+            for idx, option_text in enumerate(q["options"], start=1):
+                db.add(
+                    QuestionOption(
+                        question_id=question.id,
+                        option_text=option_text,
+                        option_order=idx,
+                        is_correct=(idx == correct),
+                    )
+                )
+
+
 def seed_roles_and_papers(db: Session) -> None:
+    """Create or update each role's paper from its JSON file.
+
+    A paper that no assessment references yet is updated in place. Once an assessment
+    exists against it, the questions are frozen and a new version is created instead, so
+    a candidate's paper never changes underneath them.
+    """
     for spec in load_bank():
         role = db.scalar(select(Role).where(Role.role_name == spec["role_name"]))
         if role is None:
@@ -109,48 +193,69 @@ def seed_roles_and_papers(db: Session) -> None:
             db.flush()
             print(f"[seed] created role: {role.role_name}")
 
-        existing = db.scalar(
-            select(QuestionPaper).where(
-                QuestionPaper.role_id == role.id, QuestionPaper.version == 1
-            )
+        latest = db.scalar(
+            select(QuestionPaper)
+            .where(QuestionPaper.role_id == role.id)
+            .order_by(QuestionPaper.version.desc())
         )
-        if existing is not None:
-            continue  # never rewrite a paper an assessment may already point at
 
+        # No paper yet: create version 1.
+        if latest is None:
+            paper = QuestionPaper(
+                role_id=role.id, paper_title=spec["paper_title"], version=1, is_active=True
+            )
+            db.add(paper)
+            db.flush()
+            _add_questions(db, paper, spec)
+            db.commit()
+            print(f"[seed] seeded paper v1 for {role.role_name} ({len(spec['questions'])} questions)")
+            continue
+
+        # Unchanged: nothing to do.
+        if _paper_fingerprint(db, latest) == _spec_fingerprint(spec):
+            continue
+
+        in_use = db.scalar(
+            select(func.count(Assessment.id)).where(Assessment.question_paper_id == latest.id)
+        )
+
+        if not in_use:
+            # Safe to correct in place - no assessment has been issued against it.
+            db.execute(delete(QuestionOption).where(
+                QuestionOption.question_id.in_(
+                    select(Question.id).where(Question.question_paper_id == latest.id)
+                )
+            ))
+            db.execute(delete(Question).where(Question.question_paper_id == latest.id))
+            latest.paper_title = spec["paper_title"]
+            latest.is_active = True
+            db.flush()
+            _add_questions(db, latest, spec)
+            db.commit()
+            print(
+                f"[seed] updated paper v{latest.version} for {role.role_name} "
+                f"({len(spec['questions'])} questions)"
+            )
+            continue
+
+        # Already issued to candidates: freeze it and publish a new version.
+        for old in db.scalars(select(QuestionPaper).where(QuestionPaper.role_id == role.id)).all():
+            old.is_active = False
         paper = QuestionPaper(
-            role_id=role.id, paper_title=spec["paper_title"], version=1, is_active=True
+            role_id=role.id,
+            paper_title=spec["paper_title"],
+            version=latest.version + 1,
+            is_active=True,
         )
         db.add(paper)
         db.flush()
-
-        for q in spec["questions"]:
-            qtype = QuestionType(q["question_type"])
-            question = Question(
-                question_paper_id=paper.id,
-                question_text=q["question_text"],
-                question_type=qtype,
-                marks=int(q["marks"]),
-                question_order=int(q["question_order"]),
-                is_required=bool(q.get("is_required", True)),
-                instructions=q.get("instructions"),
-                evaluation_criteria=q.get("evaluation_criteria"),
-            )
-            db.add(question)
-            db.flush()
-
-            if qtype == QuestionType.OBJECTIVE:
-                correct = int(q["correct_option_order"])
-                for idx, option_text in enumerate(q["options"], start=1):
-                    db.add(
-                        QuestionOption(
-                            question_id=question.id,
-                            option_text=option_text,
-                            option_order=idx,
-                            is_correct=(idx == correct),
-                        )
-                    )
+        _add_questions(db, paper, spec)
         db.commit()
-        print(f"[seed] seeded paper v1 for {role.role_name} ({len(spec['questions'])} questions)")
+        print(
+            f"[seed] published paper v{paper.version} for {role.role_name} "
+            f"({len(spec['questions'])} questions); v{latest.version} kept for "
+            f"{in_use} existing assessment(s)"
+        )
 
 
 def validate(db: Session) -> None:

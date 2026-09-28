@@ -202,12 +202,14 @@ export default function Candidates() {
                     </td>
                     <td className="td whitespace-nowrap text-xs">{formatDateTime(r.submitted_at)}</td>
                     <td className="td whitespace-nowrap">
-                      {r.status === 'SUBMITTED' ? (
+                      {r.status !== 'SUBMITTED' ? (
+                        <span className="text-slate-400">—</span>
+                      ) : r.objective_max === 0 ? (
+                        <span className="text-xs text-slate-500">n/a</span>
+                      ) : (
                         <span className="font-semibold text-slate-900">
                           {r.objective_score ?? 0} / {r.objective_max}
                         </span>
-                      ) : (
-                        <span className="text-slate-400">—</span>
                       )}
                     </td>
                     <td className="td">

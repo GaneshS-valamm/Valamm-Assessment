@@ -330,14 +330,40 @@ workflow changes — the database only ever holds the `storage_key`.
 
 ## 10. Question papers
 
-32 questions total — 8 per role (4 objective × 5 marks, 4 subjective × 20 marks = 100 marks/paper).
-Source of truth: the JSON files in `backend/question_bank/`.
+38 questions across the four roles. Source of truth: the JSON files in `backend/question_bank/`.
 
-* **Editing before first run:** change the JSON, then `python -m app.seed`.
-* **Changing a role's questions after links have been sent:** create a new version rather than
-  editing v1 — `POST /api/admin/question-papers` then `POST /api/admin/questions`. New assessments
-  pick up the new active version; assessments already generated stay pinned to the version they were
-  created with, so a candidate's paper never changes underneath them.
+| Role | Paper | Questions | Marks |
+| --- | --- | --- | --- |
+| Enterprise Sales Manager – Agentic AI Solutions | drafted | 4 objective × 5 + 4 subjective × 20 | 100 |
+| AWS Partner Operations & Marketplace Specialist | drafted | 4 objective × 5 + 4 subjective × 20 | 100 |
+| Sales Development Representative (SDR) – Enterprise Sales | **the real Valamm.AI screening form** | 14 free-text | 100 |
+| Account Manager – Enterprise Sales | drafted | 4 objective × 5 + 4 subjective × 20 | 100 |
+
+The SDR paper is transcribed verbatim from `SDR_Candidate_Screening_Form_1.docx` — all 14 questions
+are free-text with no multiple choice, exactly as on the form. The form carries no marks, so the
+weighting below was added for this platform and can be changed freely in the JSON: logistics and
+factual questions are worth little (location 2, WFO 4, years 4, notice 2, CTC 2), the substantive
+ones carry the paper (converting a cold prospect 14, targets and numbers 12, past experience 10,
+role fit 10, recent success 10, recent failure 10, global experience 8, CRM tools 6, cold calling 6).
+Totals 100, so the percentage stays meaningful. Each question has evaluation criteria written for the
+evaluator, including which answers should be treated as informational only and which are screening
+gates (daily office attendance, willingness to cold call).
+
+A paper with no objective questions scores entirely through human evaluation: the objective card
+reads *Not applicable*, and the final score stays *Pending Evaluation* until all 14 are marked.
+
+* **Editing questions:** change the JSON, then run `python -m app.seed` (or restart the backend).
+  The seed compares each file against the database and acts accordingly:
+  * no paper for that role yet → creates version 1;
+  * paper exists and matches the file → does nothing;
+  * paper differs and **no assessment references it** → updates it in place;
+  * paper differs and assessments **do** reference it → freezes that version and publishes the next
+    one, printing e.g. `published paper v2 … v1 kept for 2 existing assessment(s)`.
+
+  So a candidate's paper never changes underneath them, and correcting a paper before it has been
+  issued does not leave a stray version behind.
+* **Adding questions through the API instead:** `POST /api/admin/question-papers` then
+  `POST /api/admin/questions`.
 * **Viewing papers and answer keys:** admin → *Question Papers* → "Show answer keys".
 
 ---
@@ -351,6 +377,7 @@ All six acceptance workflows were executed against the running application:
 | 1 — Admin login | Pass. Valid login issues a JWT; wrong password → 401 `Invalid User ID or password.`; `/api/admin/*` without a token → 401; 11th bad login in a minute → 429 |
 | 2 — Generate four assessments | Pass. One per role, four distinct tokens, each pinned to paper v1 with 8 questions; durations 75/60/45/60 min honoured |
 | 3 — Candidate question papers | Pass. Correct name and role shown; 4 objective + 4 subjective in order 1–8; no question id shared between roles; responses contain no `is_correct` / `evaluation_criteria` |
+| SDR real form (27 checks) | Pass. 14 free-text questions, no options anywhere, order 1–14, 100 marks, all with evaluator criteria; other three papers unchanged at 4+4; candidate typed and autosaved all 14 answers with multi-line text preserved byte-for-byte; objective section reported as not applicable; final score withheld until all 14 evaluated, then 91/100 = 91%; per-question marks cap enforced (422) |
 | 4 — Autosave and submission | Pass. 8/8 answers persisted, restored byte-for-byte after re-fetch (newlines and code indentation intact); submit → `SUBMITTED`; second submit → 409; post-submit edit → 409; reopening the link shows the submitted state |
 | 5 — Admin results | Pass. Objective auto-scored 15/20 (3 of 4 correct); selected vs. correct option shown per question; full subjective text shown; evaluations saved and re-read; final score stayed `Pending Evaluation` until all four were marked, then resolved to 78/100 = 78% |
 | 6 — Persistence | Pass. After stopping and restarting the backend, all assessments, links, answers, timestamps and evaluations were still present and correct |
