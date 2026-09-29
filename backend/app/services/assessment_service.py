@@ -235,10 +235,12 @@ def record_interest(db: Session, assessment: Assessment, interested: bool) -> As
 
 
 def grant_extra_time(db: Session, assessment: Assessment, extra_minutes: int) -> Assessment:
-    """Set the total extra minutes for this candidate, reopening the link if the timer closed it.
+    """Set the total extra minutes for this candidate, reopening a closed paper.
 
     Nothing the candidate wrote is touched: answers stay exactly as they were saved, and the
-    same link keeps working. A paper the candidate submitted themselves is never reopened.
+    same link keeps working. Granting time reopens a paper that had closed, whether the timer
+    ended it or the candidate submitted, because it is an explicit decision to let them carry
+    on. Absent a grant, a submitted paper remains final and rejects every change.
     """
     if extra_minutes < 0:
         raise HTTPException(
@@ -246,13 +248,10 @@ def grant_extra_time(db: Session, assessment: Assessment, extra_minutes: int) ->
             detail="Extra time cannot be negative.",
         )
 
-    # Extra time can be recorded against any candidate, whatever their status. Whether it
-    # reopens the link is a separate question, decided below: a paper the candidate
-    # submitted themselves stays closed, so submitted answers can never be edited again.
-    submitted_by_candidate = (
-        assessment.status == AssessmentStatus.SUBMITTED and not assessment.auto_closed
-    )
-    was_closed = assessment.status == AssessmentStatus.SUBMITTED and assessment.auto_closed
+    # Granting extra time is an explicit admin decision to let the candidate carry on, so
+    # it reopens any closed paper - whether the timer ended it or the candidate submitted.
+    # Without a grant a submitted paper stays final; that is still enforced everywhere else.
+    was_closed = assessment.status == AssessmentStatus.SUBMITTED
     previous = assessment.extra_minutes or 0
 
     try:
@@ -263,7 +262,8 @@ def grant_extra_time(db: Session, assessment: Assessment, extra_minutes: int) ->
         reopened = False
         if was_closed:
             deadline = expires_at(assessment)
-            if deadline is not None and deadline > utcnow():
+            # No deadline at all means the paper is untimed, so there is nothing to expire.
+            if deadline is None or deadline > utcnow():
                 # Enough time to be worth reopening: restore the paper as it was left.
                 assessment.status = AssessmentStatus.IN_PROGRESS
                 assessment.submitted_at = None
@@ -282,10 +282,6 @@ def grant_extra_time(db: Session, assessment: Assessment, extra_minutes: int) ->
         raise
 
     db.refresh(assessment)
-
-    if submitted_by_candidate:
-        # Value stored for the record; the paper is deliberately left closed.
-        return assessment
 
     if was_closed and not reopened:
         raise HTTPException(

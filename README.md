@@ -317,18 +317,20 @@ In the Candidates table **every** row has an editable **Extra Time** field in mi
 In Progress and Submitted alike. Setting it:
 
 * moves the deadline to `started_at + duration_minutes + extra_minutes`;
-* **reopens the link** if the timer had closed the paper — status returns to In Progress, the
+* **reopens the link** if the paper had closed for any reason — status returns to In Progress, the
   submission timestamp is cleared, the resume is unlocked, and every saved answer loads straight
-  back for the candidate to carry on;
+  back for the candidate to carry on and revise;
 * shows the candidate a banner — *"Your time has been extended… Everything you had already written
   has been kept."*
 
 Two guards matter:
 
-* **A paper the candidate submitted themselves is never reopened.** `auto_closed` records who ended
-  it: the timer, or the candidate. The Extra Time field is still editable on those rows and the value
-  is recorded, but the link stays closed — the row shows *"they submitted — link stays closed"*, and
-  `GET /questions` and answer saves keep returning `409`. Submitted answers can never be edited.
+* **A submitted paper is final until, and only until, extra time is granted.** With no grant the
+  link keeps showing the confirmation page, `GET /questions` returns `409` and answer saves return
+  `409`. Typing extra time against the row is an explicit decision to let the candidate carry on, so
+  it reopens the paper whether the timer ended it or the candidate submitted — every answer is loaded
+  back and can be revised, and the candidate can send again. `auto_closed` still records which of the
+  two ended it, so the table can show *"ran out of time"* or *"they submitted — add time to reopen"*.
 * **An extension too small to matter is refused.** If the new deadline would still be in the past,
   the grant returns `409` explaining that a larger allowance is needed, rather than reopening the
   paper for a moment and closing it again.
@@ -490,7 +492,7 @@ All six acceptance workflows were executed against the running application:
 | 5 — Admin results | Pass. Objective auto-scored 15/20 (3 of 4 correct); selected vs. correct option shown per question; full subjective text shown; evaluations saved and re-read; final score stayed `Pending Evaluation` until all four were marked, then resolved to 78/100 = 78% |
 | 6 — Persistence | Pass. After stopping and restarting the backend, all assessments, links, answers, timestamps and evaluations were still present and correct |
 
-### Extra time (28/28 checks)
+### Extra time (41/41 checks)
 
 | Check | Result |
 | --- | --- |
@@ -503,8 +505,11 @@ All six acceptance workflows were executed against the running application:
 | Earlier answers load back verbatim | Pass, indentation intact |
 | Candidate finishes the rest and submits | Pass. 15/15, `auto_submitted` false |
 | After a real submission the link is final | Pass. `409` on questions and on answer saves |
-| Extra time cannot reopen a submitted paper | Pass. `409`, and the field is disabled in the UI |
-| Answers intact after the refused grant | Pass. 15/15 in the results |
+| A submitted paper reopens when extra time is typed in | Pass. Back to In Progress, timestamp cleared |
+| All 15 answers preserved through the reopen | Pass, loaded back for the candidate |
+| Candidate can revise an answer and send again | Pass, revision visible to the admin |
+| Closes again after the second send with no new grant | Pass. `409` |
+| Editable while still Generated | Pass. Starting then gives duration + extra (50 min for 30+20) |
 | Extra time while still in progress | Pass. Deadline moved by exactly 900s |
 | Set back to zero / negative refused | Pass / `422` |
 

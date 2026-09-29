@@ -492,7 +492,8 @@ export default function CandidateAssessment() {
             <Alert kind="success">
               <strong>Your time has been extended.</strong> Our team has added{' '}
               {meta?.extra_minutes} extra minute{meta?.extra_minutes === 1 ? '' : 's'}, so you can
-              carry on from where you left off. Everything you had already written has been kept.
+              carry on from where you left off. Everything you had already written has been kept, and
+              you can revise it before sending your answers again.
             </Alert>
           </div>
         )}

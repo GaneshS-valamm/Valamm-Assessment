@@ -114,13 +114,10 @@ export default function Candidates() {
       const updated = await adminApi.setExtraTime(row.id, minutes);
       setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
       const reopened = updated.status === 'IN_PROGRESS' && row.status === 'SUBMITTED';
-      const stillClosed = updated.status === 'SUBMITTED' && !updated.auto_closed;
       setNotice(
         reopened
           ? `${row.candidate_name} has ${minutes} extra minutes — their link is open again and all their answers are intact.`
-          : stillClosed
-            ? `Recorded ${minutes} extra minutes for ${row.candidate_name}, but they sent their answers themselves so the link stays closed.`
-            : `${row.candidate_name} now has ${minutes} extra minutes.`,
+          : `${row.candidate_name} now has ${minutes} extra minutes.`,
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not change the extra time.');
@@ -326,7 +323,7 @@ export default function Candidates() {
                       )}
                       {r.status === 'SUBMITTED' && !r.auto_closed && (
                         <span className="mt-1 block text-xs text-slate-500">
-                          they submitted — link stays closed
+                          they submitted — add time to reopen
                         </span>
                       )}
                       {r.extra_minutes > 0 && r.status === 'IN_PROGRESS' && (
