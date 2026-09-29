@@ -178,7 +178,14 @@ Assesment/
 
 Schema is created automatically on first start. New **tables** come from `create_all`; new
 **columns** on tables that already exist are applied by `migrate_columns()` in `app/seed.py`, which
-runs on every start and is idempotent. So **no manual migration is needed** — run
+runs on every start and is idempotent — it inspects the live table and skips anything already there,
+so it is safe to re-run, including after a deploy that failed part-way.
+
+Column definitions that differ between backends are written with placeholders and rendered by
+`column_ddl()` from the connected engine's dialect: `{ts}` becomes `TIMESTAMP WITH TIME ZONE` on
+PostgreSQL and `DATETIME` on SQLite, and `{false}` becomes `FALSE` on PostgreSQL and `0` on SQLite.
+The boolean case matters — PostgreSQL rejects `BOOLEAN NOT NULL DEFAULT 0` with a
+`DatatypeMismatch`, while SQLite accepts it. So **no manual migration is needed** — run
 `python -m app.seed` (or just start the backend) and it prints each column it adds:
 
 ```

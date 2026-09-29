@@ -37,7 +37,7 @@ ADDED_COLUMNS: dict[str, dict[str, str]] = {
         "test_role_id": "INTEGER NULL",
         "extra_minutes": "INTEGER NOT NULL DEFAULT 0",
         "extra_time_granted_at": "{ts} NULL",
-        "auto_closed": "BOOLEAN NOT NULL DEFAULT 0",
+        "auto_closed": "BOOLEAN NOT NULL DEFAULT {false}",
         "interviewer_1": "VARCHAR(255) NULL",
         "interviewer_2": "VARCHAR(255) NULL",
         "resume_confirmed_at": "{ts} NULL",
@@ -51,11 +51,32 @@ ADDED_COLUMNS: dict[str, dict[str, str]] = {
 }
 
 
+def column_ddl(ddl: str, dialect: str) -> str:
+    """Render a column definition for the connected database.
+
+    Types and literals that differ between backends are written as placeholders in
+    ADDED_COLUMNS and substituted here. PostgreSQL rejects an integer default on a
+    boolean column, so booleans must use FALSE rather than 0.
+    """
+    sqlite = dialect == "sqlite"
+    return ddl.format(
+        ts="DATETIME" if sqlite else "TIMESTAMP WITH TIME ZONE",
+        false="0" if sqlite else "FALSE",
+        true="1" if sqlite else "TRUE",
+    )
+
+
 def migrate_columns() -> None:
-    """Add any missing columns to tables that already exist."""
+    """Add any missing columns to tables that already exist.
+
+    Idempotent: the live table is inspected first and anything already present is
+    skipped, so this is safe on every boot and safe to re-run after a failed deploy.
+    Only ADD COLUMN is issued - no column is ever dropped, retyped or rewritten, and
+    existing rows simply pick up the declared default.
+    """
     inspector = inspect(engine)
     existing_tables = set(inspector.get_table_names())
-    ts_type = "TIMESTAMP WITH TIME ZONE" if not settings.is_sqlite else "DATETIME"
+    dialect = engine.dialect.name
 
     with engine.begin() as conn:
         for table, columns in ADDED_COLUMNS.items():
@@ -64,9 +85,9 @@ def migrate_columns() -> None:
             present = {c["name"] for c in inspector.get_columns(table)}
             for name, ddl in columns.items():
                 if name in present:
-                    continue
+                    continue  # already migrated by an earlier boot
                 conn.execute(
-                    text(f"ALTER TABLE {table} ADD COLUMN {name} {ddl.format(ts=ts_type)}")
+                    text(f"ALTER TABLE {table} ADD COLUMN {name} {column_ddl(ddl, dialect)}")
                 )
                 print(f"[migrate] {table}.{name} added")
 
