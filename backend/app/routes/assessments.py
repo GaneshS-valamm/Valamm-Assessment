@@ -15,6 +15,7 @@ from ..schemas import (
     AssessmentRowOut,
     AssessmentUpdate,
     DashboardStats,
+    ExtraTimeRequest,
     MessageOut,
     ResultOut,
 )
@@ -156,6 +157,19 @@ def update_assessment(
         db.rollback()
         raise
     db.refresh(assessment)
+    return AssessmentRowOut(**assessment_service.to_row(db, assessment))
+
+
+@router.put("/assessments/{assessment_id}/extra-time", response_model=AssessmentRowOut)
+def set_extra_time(
+    assessment_id: int,
+    payload: ExtraTimeRequest,
+    db: Session = Depends(get_db),
+    _: AdminUser = Depends(get_current_admin),
+) -> AssessmentRowOut:
+    """Give a candidate more time. Reopens the same link if the timer had closed it."""
+    assessment = _get_assessment(db, assessment_id)
+    assessment_service.grant_extra_time(db, assessment, payload.extra_minutes)
     return AssessmentRowOut(**assessment_service.to_row(db, assessment))
 
 

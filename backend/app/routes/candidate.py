@@ -75,6 +75,7 @@ def get_assessment(token: str, request: Request, db: Session = Depends(get_db)) 
         interest_responded_at=assessment.interest_responded_at,
         expires_at=assessment_service.expires_at(assessment),
         seconds_remaining=assessment_service.seconds_remaining(assessment),
+        extra_minutes=assessment.extra_minutes or 0,
         other_roles=[
             RoleOut.model_validate(r)
             for r in db.scalars(
@@ -185,6 +186,7 @@ def questions(token: str, request: Request, db: Session = Depends(get_db)) -> Ca
         started_at=assessment.started_at,
         expires_at=assessment_service.expires_at(assessment),
         seconds_remaining=assessment_service.seconds_remaining(assessment),
+        extra_minutes=assessment.extra_minutes or 0,
         questions=out,
     )
 

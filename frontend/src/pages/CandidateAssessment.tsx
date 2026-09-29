@@ -53,6 +53,8 @@ export default function CandidateAssessment() {
         } else if (m.interest_response === 'NOT_INTERESTED') {
           setPhase('declined');
         } else if (m.status === 'IN_PROGRESS') {
+          // Also covers a paper the admin reopened by granting extra time: every saved
+          // answer loads back and the countdown reflects the new deadline.
           // Resume: an already-started assessment goes straight back to the paper.
           const q = await candidateApi.questions(token);
           if (!alive) return;
@@ -484,6 +486,16 @@ export default function CandidateAssessment() {
             {remaining !== null && <Countdown seconds={remaining} />}
           </div>
         </div>
+
+        {(meta?.extra_minutes ?? 0) > 0 && (
+          <div className="mb-4">
+            <Alert kind="success">
+              <strong>Your time has been extended.</strong> Our team has added{' '}
+              {meta?.extra_minutes} extra minute{meta?.extra_minutes === 1 ? '' : 's'}, so you can
+              carry on from where you left off. Everything you had already written has been kept.
+            </Alert>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4">

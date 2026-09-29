@@ -51,6 +51,9 @@ export interface AssessmentRow {
   expires_at: string | null;
   answered_count: number;
   question_count: number;
+  extra_minutes: number;
+  extra_time_granted_at: string | null;
+  auto_closed: boolean;
 }
 
 export interface AssessmentList {
@@ -162,6 +165,7 @@ export interface CandidateAssessment {
   interest_responded_at: string | null;
   expires_at: string | null;
   seconds_remaining: number | null;
+  extra_minutes: number;
   other_roles: Role[];
 }
 
@@ -173,6 +177,7 @@ export interface CandidateQuestions {
   started_at: string | null;
   expires_at: string | null;
   seconds_remaining: number | null;
+  extra_minutes: number;
   questions: CandidateQuestion[];
 }
 
@@ -222,6 +227,7 @@ export interface AssessmentResult {
   interviewer_1: string | null;
   interviewer_2: string | null;
   duration_minutes: number | null;
+  extra_minutes: number;
   auto_submitted: boolean;
   answered_count: number;
   candidate_name: string;

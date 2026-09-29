@@ -135,6 +135,13 @@ export const adminApi = {
       body: JSON.stringify(patch),
     }),
 
+  /** Total extra minutes for a candidate; reopens a timer-closed link. */
+  setExtraTime: (id: number, extra_minutes: number) =>
+    authed<AssessmentRow>(`/api/admin/assessments/${id}/extra-time`, {
+      method: 'PUT',
+      body: JSON.stringify({ extra_minutes }),
+    }),
+
   deleteAssessment: (id: number) =>
     authed<{ message: string }>(`/api/admin/assessments/${id}`, { method: 'DELETE' }),
   results: (id: number) => authed<AssessmentResult>(`/api/admin/assessments/${id}/results`),

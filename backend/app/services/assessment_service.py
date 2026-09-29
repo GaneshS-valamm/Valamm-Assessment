@@ -109,13 +109,19 @@ def create_assessment(
 
 
 def expires_at(assessment: Assessment) -> datetime | None:
-    """When the candidate's time runs out, or None if the paper is untimed."""
+    """When the candidate's time runs out, or None if the paper is untimed.
+
+    Any extra minutes the admin has granted are included, so granting time moves the
+    deadline for the existing link rather than issuing a new one.
+    """
     if not assessment.duration_minutes or assessment.started_at is None:
         return None
     started = assessment.started_at
     if started.tzinfo is None:
         started = started.replace(tzinfo=timezone.utc)
-    return started + timedelta(minutes=assessment.duration_minutes)
+    return started + timedelta(
+        minutes=assessment.duration_minutes + (assessment.extra_minutes or 0)
+    )
 
 
 def seconds_remaining(assessment: Assessment) -> int | None:
@@ -143,6 +149,7 @@ def close_if_expired(db: Session, assessment: Assessment) -> bool:
     try:
         assessment.status = AssessmentStatus.SUBMITTED
         assessment.submitted_at = expires_at(assessment) or utcnow()
+        assessment.auto_closed = True
         resume_service.lock_resumes(db, assessment.id)
         db.commit()
     except Exception:
@@ -224,6 +231,69 @@ def record_interest(db: Session, assessment: Assessment, interested: bool) -> As
     assessment.interest_responded_at = utcnow()
     db.commit()
     db.refresh(assessment)
+    return assessment
+
+
+def grant_extra_time(db: Session, assessment: Assessment, extra_minutes: int) -> Assessment:
+    """Set the total extra minutes for this candidate, reopening the link if the timer closed it.
+
+    Nothing the candidate wrote is touched: answers stay exactly as they were saved, and the
+    same link keeps working. A paper the candidate submitted themselves is never reopened.
+    """
+    if extra_minutes < 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Extra time cannot be negative.",
+        )
+
+    if assessment.status == AssessmentStatus.SUBMITTED and not assessment.auto_closed:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                "This candidate submitted their answers themselves, so the link cannot be "
+                "reopened. Extra time can only be given to a paper the timer closed."
+            ),
+        )
+
+    was_closed = assessment.status == AssessmentStatus.SUBMITTED and assessment.auto_closed
+    previous = assessment.extra_minutes or 0
+
+    try:
+        assessment.extra_minutes = extra_minutes
+        if extra_minutes != previous:
+            assessment.extra_time_granted_at = utcnow()
+
+        reopened = False
+        if was_closed:
+            deadline = expires_at(assessment)
+            if deadline is not None and deadline > utcnow():
+                # Enough time to be worth reopening: restore the paper as it was left.
+                assessment.status = AssessmentStatus.IN_PROGRESS
+                assessment.submitted_at = None
+                assessment.auto_closed = False
+                for resume in db.scalars(
+                    select(CandidateResume).where(CandidateResume.assessment_id == assessment.id)
+                ).all():
+                    resume.is_locked = False
+                reopened = True
+
+        db.commit()
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise
+
+    db.refresh(assessment)
+
+    if was_closed and not reopened:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                "That much extra time still leaves the deadline in the past, so the link stays "
+                "closed. Give a larger allowance to reopen it."
+            ),
+        )
     return assessment
 
 
@@ -464,6 +534,8 @@ def submit_assessment(db: Session, assessment: Assessment) -> tuple[Assessment, 
     try:
         assessment.status = AssessmentStatus.SUBMITTED
         assessment.submitted_at = utcnow()
+        # Submitted by the candidate, so this can never be reopened by granting time.
+        assessment.auto_closed = False
         if assessment.started_at is None:
             assessment.started_at = assessment.submitted_at
         scoring_service.recalculate_scores(db, assessment)
@@ -591,14 +663,13 @@ def build_result(db: Session, assessment: Assessment) -> dict:
         eval_status = EvaluationStatus.COMPLETED if fully_evaluated else EvaluationStatus.PENDING
 
     answered, _total = answer_counts(db, assessment)
-    # SQLite hands timestamps back naive, so normalise before comparing with the deadline.
-    deadline = expires_at(assessment)
-    submitted = utc(assessment.submitted_at)
     return {
         "assessment_id": assessment.id,
         "duration_minutes": assessment.duration_minutes,
+        "extra_minutes": assessment.extra_minutes or 0,
         "answered_count": answered,
-        "auto_submitted": bool(deadline and submitted and submitted >= deadline),
+        # Persisted, so granting extra time cannot retroactively change how it was closed.
+        "auto_submitted": assessment.auto_closed,
         "candidate_name": assessment.candidate_name,
         "candidate_email": assessment.candidate_email,
         "role_name": assessment.role.role_name,
@@ -660,6 +731,9 @@ def to_row(db: Session, assessment: Assessment) -> dict:
         "expires_at": expires_at(assessment),
         "answered_count": answered,
         "question_count": total,
+        "extra_minutes": assessment.extra_minutes or 0,
+        "extra_time_granted_at": assessment.extra_time_granted_at,
+        "auto_closed": assessment.auto_closed,
     }
 
 

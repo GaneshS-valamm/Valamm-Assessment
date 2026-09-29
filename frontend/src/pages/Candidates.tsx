@@ -103,6 +103,27 @@ export default function Candidates() {
     }
   }
 
+  /** Give a candidate more time; reopens the link if the timer had closed it. */
+  async function saveExtraTime(row: AssessmentRow, value: string) {
+    const minutes = Number(value);
+    if (!Number.isFinite(minutes) || minutes < 0) return;
+    if (minutes === (row.extra_minutes ?? 0)) return;
+    setError('');
+    setNotice('');
+    try {
+      const updated = await adminApi.setExtraTime(row.id, minutes);
+      setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+      setNotice(
+        updated.status === 'IN_PROGRESS' && row.status === 'SUBMITTED'
+          ? `${row.candidate_name} has ${minutes} extra minutes — their link is open again and all their answers are intact.`
+          : `${row.candidate_name} now has ${minutes} extra minutes.`,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not change the extra time.');
+      void load();
+    }
+  }
+
   async function doDelete() {
     if (!confirmDelete) return;
     setDeleting(true);
@@ -202,6 +223,7 @@ export default function Candidates() {
                   <th className="th">Created Date</th>
                   <th className="th">Status</th>
                   <th className="th">Submission Date</th>
+                  <th className="th">Extra Time</th>
                   <th className="th">Answers</th>
                   <th className="th">Delete</th>
                 </tr>
@@ -278,6 +300,35 @@ export default function Candidates() {
                       <StatusBadge status={r.status as AssessmentStatus} />
                     </td>
                     <td className="td whitespace-nowrap text-xs">{formatDateTime(r.submitted_at)}</td>
+                    <td className="td">
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          min={0}
+                          max={480}
+                          step={5}
+                          className="input !w-20 !px-2 !py-1 !text-xs"
+                          defaultValue={r.extra_minutes ?? 0}
+                          title={
+                            r.status === 'SUBMITTED' && !r.auto_closed
+                              ? 'This candidate submitted their own answers, so the link cannot be reopened'
+                              : 'Extra minutes on top of the original duration'
+                          }
+                          disabled={r.status === 'SUBMITTED' && !r.auto_closed}
+                          onBlur={(e) => void saveExtraTime(r, e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+                        />
+                        <span className="text-xs text-slate-500">min</span>
+                      </div>
+                      {r.auto_closed && (
+                        <span className="mt-1 block text-xs font-semibold text-amber-700">
+                          ran out of time
+                        </span>
+                      )}
+                      {r.extra_minutes > 0 && r.status === 'IN_PROGRESS' && (
+                        <span className="mt-1 block text-xs text-emerald-700">reopened</span>
+                      )}
+                    </td>
                     <td className="td">
                       {r.answered_count > 0 ? (
                         <Link to={`/admin/results/${r.id}`} className="btn-primary !px-3 !py-1.5 !text-xs">

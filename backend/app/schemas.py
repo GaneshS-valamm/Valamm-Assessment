@@ -168,6 +168,12 @@ class AssessmentUpdate(BaseModel):
     interviewer_2: str | None = Field(default=None, max_length=255)
 
 
+class ExtraTimeRequest(BaseModel):
+    """Total extra minutes for this candidate, on top of the original duration."""
+
+    extra_minutes: int = Field(ge=0, le=480)
+
+
 class AssessmentCreatedOut(BaseModel):
     id: int
     candidate_name: str
@@ -215,6 +221,9 @@ class AssessmentRowOut(BaseModel):
     expires_at: UtcDT | None = None
     answered_count: int = 0
     question_count: int = 0
+    extra_minutes: int = 0
+    extra_time_granted_at: UtcDT | None = None
+    auto_closed: bool = False
 
 
 class AssessmentListOut(BaseModel):
@@ -336,6 +345,7 @@ class CandidateAssessmentOut(BaseModel):
     interest_responded_at: UtcDT | None = None
     expires_at: UtcDT | None = None
     seconds_remaining: int | None = None
+    extra_minutes: int = 0
     # Other roles the candidate may switch to if they decline this one.
     other_roles: list[RoleOut] = []
 
@@ -352,6 +362,7 @@ class CandidateQuestionsOut(BaseModel):
     started_at: UtcDT | None
     expires_at: UtcDT | None = None
     seconds_remaining: int | None = None
+    extra_minutes: int = 0
     questions: list[CandidateQuestionOut]
 
 
@@ -414,6 +425,7 @@ class ResultOut(BaseModel):
     interviewer_1: str | None = None
     interviewer_2: str | None = None
     duration_minutes: int | None = None
+    extra_minutes: int = 0
     auto_submitted: bool = False
     answered_count: int = 0
     candidate_name: str

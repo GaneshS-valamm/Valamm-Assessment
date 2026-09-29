@@ -35,6 +35,9 @@ OPTION_LABELS = ["A", "B", "C", "D"]
 ADDED_COLUMNS: dict[str, dict[str, str]] = {
     "assessments": {
         "test_role_id": "INTEGER NULL",
+        "extra_minutes": "INTEGER NOT NULL DEFAULT 0",
+        "extra_time_granted_at": "{ts} NULL",
+        "auto_closed": "BOOLEAN NOT NULL DEFAULT 0",
         "interviewer_1": "VARCHAR(255) NULL",
         "interviewer_2": "VARCHAR(255) NULL",
         "resume_confirmed_at": "{ts} NULL",

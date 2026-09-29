@@ -171,7 +171,7 @@ Assesment/
 | `question_papers` | versioned papers per role | unique (`role_id`, `version`) |
 | `questions` | objective + subjective questions | indexed (`question_paper_id`, `question_order`) |
 | `question_options` | MCQ options + answer key | unique (`question_id`, `option_order`) |
-| `assessments` | one per candidate/link. `role_id` is the **applied role** and never changes; `test_role_id` is the role actually answered for. Plus `interviewer_1`, `interviewer_2`, `resume_confirmed_at`, `interest_response`, `interest_responded_at` | unique `unique_token_hash`; indexes on `role_id`, `status`, `candidate_email`, `created_at` |
+| `assessments` | one per candidate/link. `role_id` is the **applied role** and never changes; `test_role_id` is the role actually answered for. Plus `interviewer_1`, `interviewer_2`, `extra_minutes`, `extra_time_granted_at`, `auto_closed`, `resume_confirmed_at`, `interest_response`, `interest_responded_at` | unique `unique_token_hash`; indexes on `role_id`, `status`, `candidate_email`, `created_at` |
 | `assessment_answers` | autosaved drafts + final answers | unique (`assessment_id`, `question_id`) |
 | `assessment_evaluations` | subjective marks + feedback | unique (`assessment_id`, `question_id`), `awarded_marks >= 0` |
 | `candidate_resumes` | resume metadata + storage key (one row per version, with `uploaded_by_type` / `uploaded_by_admin_id`) | unique (`assessment_id`, `version`), unique `storage_key`, `file_size > 0`; indexes on (`assessment_id`, `is_current`), `resume_status`, `uploaded_at`, `candidate_email` |
@@ -299,6 +299,34 @@ admin generates link (+ interviewers)  ->  admin attaches resume  ->  candidate 
                                                  Test Role updated,        response" - closed
                                                  Applied Role unchanged
 ```
+
+### Extra time
+
+People sometimes run out of time before finishing. Nothing is lost when that happens — answers are
+saved as they are typed, so whatever was written is already in the database — and the admin can give
+a candidate more time on the **same link**.
+
+In the Candidates table each row has an **Extra Time** field in minutes. Setting it:
+
+* moves the deadline to `started_at + duration_minutes + extra_minutes`;
+* **reopens the link** if the timer had closed the paper — status returns to In Progress, the
+  submission timestamp is cleared, the resume is unlocked, and every saved answer loads straight
+  back for the candidate to carry on;
+* shows the candidate a banner — *"Your time has been extended… Everything you had already written
+  has been kept."*
+
+Two guards matter:
+
+* **A paper the candidate submitted themselves is never reopened.** `auto_closed` records who ended
+  it: the timer, or the candidate. Granting extra time to a candidate-submitted paper returns `409`
+  and the field is disabled in the UI. After a real submission the link keeps showing the
+  confirmation page, `GET /questions` returns `409`, and answer saves return `409`.
+* **An extension too small to matter is refused.** If the new deadline would still be in the past,
+  the grant returns `409` explaining that a larger allowance is needed, rather than reopening the
+  paper for a moment and closing it again.
+
+Extra time can also be granted while a paper is still in progress, and can be set back to zero.
+Nothing about the candidate's existing data is modified in any of these cases.
 
 ### Applied Role vs Test Role
 
@@ -446,6 +474,24 @@ All six acceptance workflows were executed against the running application:
 | 4 — Autosave and submission | Pass. 8/8 answers persisted, restored byte-for-byte after re-fetch (newlines and code indentation intact); submit → `SUBMITTED`; second submit → 409; post-submit edit → 409; reopening the link shows the submitted state |
 | 5 — Admin results | Pass. Objective auto-scored 15/20 (3 of 4 correct); selected vs. correct option shown per question; full subjective text shown; evaluations saved and re-read; final score stayed `Pending Evaluation` until all four were marked, then resolved to 78/100 = 78% |
 | 6 — Persistence | Pass. After stopping and restarting the backend, all assessments, links, answers, timestamps and evaluations were still present and correct |
+
+### Extra time (28/28 checks)
+
+| Check | Result |
+| --- | --- |
+| Time runs out mid-paper | Pass. `410` on further saves, closed by the timer and flagged `auto_closed` |
+| Answers written before expiry preserved | Pass. 5 of 15 kept |
+| An extension too small to help is refused | Pass. `409` rather than reopening then re-closing |
+| A sufficient extension reopens the same link | Pass. Back to In Progress, submission timestamp cleared |
+| The grant does not touch any answer | Pass. Still 5 of 15 |
+| Candidate sees the extension and a new countdown | Pass. 45 minutes left, banner shown |
+| Earlier answers load back verbatim | Pass, indentation intact |
+| Candidate finishes the rest and submits | Pass. 15/15, `auto_submitted` false |
+| After a real submission the link is final | Pass. `409` on questions and on answer saves |
+| Extra time cannot reopen a submitted paper | Pass. `409`, and the field is disabled in the UI |
+| Answers intact after the refused grant | Pass. 15/15 in the results |
+| Extra time while still in progress | Pass. Deadline moved by exactly 900s |
+| Set back to zero / negative refused | Pass / `422` |
 
 ### Roles, interviewers, role switching, delete (33/33 checks)
 

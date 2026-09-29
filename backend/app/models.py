@@ -197,6 +197,13 @@ class Assessment(Base):
     # (the applied role) and changes only if the candidate picks a different role.
     # role_id is never overwritten, so the applied role is always recoverable.
     test_role_id: Mapped[int | None] = mapped_column(ForeignKey("roles.id", ondelete="RESTRICT"))
+    # Extra minutes granted by the admin on top of duration_minutes. Lets a candidate
+    # whose time ran out reopen the same link and finish, without losing any answer.
+    extra_minutes: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    extra_time_granted_at: Mapped[datetime | None] = mapped_column(TS)
+    # True only when the timer closed the paper. A paper the candidate submitted has this
+    # False and can never be reopened; a timer-closed one can be, by granting extra time.
+    auto_closed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
     # Interviewers assigned by the admin; editable at any time, never candidate-visible.
     interviewer_1: Mapped[str | None] = mapped_column(String(255))
     interviewer_2: Mapped[str | None] = mapped_column(String(255))
