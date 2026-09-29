@@ -111,17 +111,31 @@ def create_assessment(
 def expires_at(assessment: Assessment) -> datetime | None:
     """When the candidate's time runs out, or None if the paper is untimed.
 
-    Any extra minutes the admin has granted are included, so granting time moves the
-    deadline for the existing link rather than issuing a new one.
+    Extra minutes granted by the admin are applied one of two ways, so that a grant is
+    always useful:
+
+    * the paper was **still running** when the time was granted - the minutes are added to
+      the original deadline, so 15 extra minutes really means 15 more than before;
+    * the paper had **already expired** - the minutes run from the moment of the grant, so
+      a candidate whose time ran out yesterday gets a fresh window starting now. Measuring
+      from started_at would leave the deadline in the past and the link shut.
     """
     if not assessment.duration_minutes or assessment.started_at is None:
         return None
+
     started = assessment.started_at
     if started.tzinfo is None:
         started = started.replace(tzinfo=timezone.utc)
-    return started + timedelta(
-        minutes=assessment.duration_minutes + (assessment.extra_minutes or 0)
-    )
+    base = started + timedelta(minutes=assessment.duration_minutes)
+
+    extra = assessment.extra_minutes or 0
+    if not extra:
+        return base
+
+    granted = utc(assessment.extra_time_granted_at)
+    if granted is not None and base <= granted:
+        return granted + timedelta(minutes=extra)
+    return base + timedelta(minutes=extra)
 
 
 def seconds_remaining(assessment: Assessment) -> int | None:
@@ -256,11 +270,14 @@ def grant_extra_time(db: Session, assessment: Assessment, extra_minutes: int) ->
 
     try:
         assessment.extra_minutes = extra_minutes
-        if extra_minutes != previous:
+        # Refresh the stamp when the value changes, and always for a closed paper - the
+        # deadline of an expired paper is measured from this moment, so re-entering the
+        # same number must still open the link.
+        if extra_minutes != previous or was_closed:
             assessment.extra_time_granted_at = utcnow()
 
         reopened = False
-        if was_closed:
+        if was_closed and extra_minutes > 0:
             deadline = expires_at(assessment)
             # No deadline at all means the paper is untimed, so there is nothing to expire.
             if deadline is None or deadline > utcnow():
@@ -287,8 +304,8 @@ def grant_extra_time(db: Session, assessment: Assessment, extra_minutes: int) ->
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=(
-                "That much extra time still leaves the deadline in the past, so the link stays "
-                "closed. Give a larger allowance to reopen it."
+                "Enter a number of extra minutes to reopen this candidate's link. Setting it to "
+                "zero leaves the paper closed."
             ),
         )
     return assessment

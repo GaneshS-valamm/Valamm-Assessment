@@ -314,7 +314,19 @@ saved as they are typed, so whatever was written is already in the database — 
 a candidate more time on the **same link**.
 
 In the Candidates table **every** row has an editable **Extra Time** field in minutes — Generated,
-In Progress and Submitted alike. Setting it:
+In Progress and Submitted alike.
+
+How the minutes are applied depends on whether the clock had already run out, so that a grant is
+always useful:
+
+* the paper was **still running** — the minutes are added to the original deadline, so 15 extra
+  minutes really means 15 more than before;
+* the paper had **already expired** — the minutes run from the moment of the grant. A candidate whose
+  time ran out yesterday gets a fresh window starting now. Measured from `started_at` instead, the
+  deadline would still be in the past and the link would stay shut, which is the whole point of the
+  feature.
+
+Setting it:
 
 * moves the deadline to `started_at + duration_minutes + extra_minutes`;
 * **reopens the link** if the paper had closed for any reason — status returns to In Progress, the
@@ -331,9 +343,9 @@ Two guards matter:
   it reopens the paper whether the timer ended it or the candidate submitted — every answer is loaded
   back and can be revised, and the candidate can send again. `auto_closed` still records which of the
   two ended it, so the table can show *"ran out of time"* or *"they submitted — add time to reopen"*.
-* **An extension too small to matter is refused.** If the new deadline would still be in the past,
-  the grant returns `409` explaining that a larger allowance is needed, rather than reopening the
-  paper for a moment and closing it again.
+* **Zero leaves a closed paper closed.** Setting the field to `0` on a closed paper returns `409`
+  asking for a number of minutes, rather than silently doing nothing. Any positive number reopens it,
+  however long ago it expired.
 
 Extra time can be granted at any point: before the candidate starts (they then get
 `duration + extra` from the outset), while they are working, or after the timer closed the paper. It
@@ -492,7 +504,7 @@ All six acceptance workflows were executed against the running application:
 | 5 — Admin results | Pass. Objective auto-scored 15/20 (3 of 4 correct); selected vs. correct option shown per question; full subjective text shown; evaluations saved and re-read; final score stayed `Pending Evaluation` until all four were marked, then resolved to 78/100 = 78% |
 | 6 — Persistence | Pass. After stopping and restarting the backend, all assessments, links, answers, timestamps and evaluations were still present and correct |
 
-### Extra time (41/41 checks)
+### Extra time (41/41 checks, plus 18/18 for long-expired papers)
 
 | Check | Result |
 | --- | --- |
@@ -510,6 +522,11 @@ All six acceptance workflows were executed against the running application:
 | Candidate can revise an answer and send again | Pass, revision visible to the admin |
 | Closes again after the second send with no new grant | Pass. `409` |
 | Editable while still Generated | Pass. Starting then gives duration + extra (50 min for 30+20) |
+| A paper that expired ~26 hours ago reopens | Pass, both when the timer closed it and when the candidate submitted |
+| The reopened clock starts from the grant | Pass. 30 min granted → 30 min left, not a past deadline |
+| Answers intact and the candidate carries on | Pass, 4 of 16 preserved and further answers accepted |
+| Re-entering the same number reopens again | Pass, after the granted window itself elapsed |
+| Zero on a closed paper is refused | Pass. `409` with a clear message |
 | Extra time while still in progress | Pass. Deadline moved by exactly 900s |
 | Set back to zero / negative refused | Pass / `422` |
 
