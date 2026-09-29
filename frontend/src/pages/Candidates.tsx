@@ -113,10 +113,14 @@ export default function Candidates() {
     try {
       const updated = await adminApi.setExtraTime(row.id, minutes);
       setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+      const reopened = updated.status === 'IN_PROGRESS' && row.status === 'SUBMITTED';
+      const stillClosed = updated.status === 'SUBMITTED' && !updated.auto_closed;
       setNotice(
-        updated.status === 'IN_PROGRESS' && row.status === 'SUBMITTED'
+        reopened
           ? `${row.candidate_name} has ${minutes} extra minutes — their link is open again and all their answers are intact.`
-          : `${row.candidate_name} now has ${minutes} extra minutes.`,
+          : stillClosed
+            ? `Recorded ${minutes} extra minutes for ${row.candidate_name}, but they sent their answers themselves so the link stays closed.`
+            : `${row.candidate_name} now has ${minutes} extra minutes.`,
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not change the extra time.');
@@ -309,12 +313,7 @@ export default function Candidates() {
                           step={5}
                           className="input !w-20 !px-2 !py-1 !text-xs"
                           defaultValue={r.extra_minutes ?? 0}
-                          title={
-                            r.status === 'SUBMITTED' && !r.auto_closed
-                              ? 'This candidate submitted their own answers, so the link cannot be reopened'
-                              : 'Extra minutes on top of the original duration'
-                          }
-                          disabled={r.status === 'SUBMITTED' && !r.auto_closed}
+                          title="Extra minutes on top of the original duration"
                           onBlur={(e) => void saveExtraTime(r, e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
                         />
@@ -325,8 +324,15 @@ export default function Candidates() {
                           ran out of time
                         </span>
                       )}
+                      {r.status === 'SUBMITTED' && !r.auto_closed && (
+                        <span className="mt-1 block text-xs text-slate-500">
+                          they submitted — link stays closed
+                        </span>
+                      )}
                       {r.extra_minutes > 0 && r.status === 'IN_PROGRESS' && (
-                        <span className="mt-1 block text-xs text-emerald-700">reopened</span>
+                        <span className="mt-1 block text-xs text-emerald-700">
+                          link open, {r.extra_minutes} min added
+                        </span>
                       )}
                     </td>
                     <td className="td">

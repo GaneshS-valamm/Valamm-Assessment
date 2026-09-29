@@ -246,15 +246,12 @@ def grant_extra_time(db: Session, assessment: Assessment, extra_minutes: int) ->
             detail="Extra time cannot be negative.",
         )
 
-    if assessment.status == AssessmentStatus.SUBMITTED and not assessment.auto_closed:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=(
-                "This candidate submitted their answers themselves, so the link cannot be "
-                "reopened. Extra time can only be given to a paper the timer closed."
-            ),
-        )
-
+    # Extra time can be recorded against any candidate, whatever their status. Whether it
+    # reopens the link is a separate question, decided below: a paper the candidate
+    # submitted themselves stays closed, so submitted answers can never be edited again.
+    submitted_by_candidate = (
+        assessment.status == AssessmentStatus.SUBMITTED and not assessment.auto_closed
+    )
     was_closed = assessment.status == AssessmentStatus.SUBMITTED and assessment.auto_closed
     previous = assessment.extra_minutes or 0
 
@@ -285,6 +282,10 @@ def grant_extra_time(db: Session, assessment: Assessment, extra_minutes: int) ->
         raise
 
     db.refresh(assessment)
+
+    if submitted_by_candidate:
+        # Value stored for the record; the paper is deliberately left closed.
+        return assessment
 
     if was_closed and not reopened:
         raise HTTPException(

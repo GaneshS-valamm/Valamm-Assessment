@@ -313,7 +313,8 @@ People sometimes run out of time before finishing. Nothing is lost when that hap
 saved as they are typed, so whatever was written is already in the database — and the admin can give
 a candidate more time on the **same link**.
 
-In the Candidates table each row has an **Extra Time** field in minutes. Setting it:
+In the Candidates table **every** row has an editable **Extra Time** field in minutes — Generated,
+In Progress and Submitted alike. Setting it:
 
 * moves the deadline to `started_at + duration_minutes + extra_minutes`;
 * **reopens the link** if the timer had closed the paper — status returns to In Progress, the
@@ -325,14 +326,21 @@ In the Candidates table each row has an **Extra Time** field in minutes. Setting
 Two guards matter:
 
 * **A paper the candidate submitted themselves is never reopened.** `auto_closed` records who ended
-  it: the timer, or the candidate. Granting extra time to a candidate-submitted paper returns `409`
-  and the field is disabled in the UI. After a real submission the link keeps showing the
-  confirmation page, `GET /questions` returns `409`, and answer saves return `409`.
+  it: the timer, or the candidate. The Extra Time field is still editable on those rows and the value
+  is recorded, but the link stays closed — the row shows *"they submitted — link stays closed"*, and
+  `GET /questions` and answer saves keep returning `409`. Submitted answers can never be edited.
 * **An extension too small to matter is refused.** If the new deadline would still be in the past,
   the grant returns `409` explaining that a larger allowance is needed, rather than reopening the
   paper for a moment and closing it again.
 
-Extra time can also be granted while a paper is still in progress, and can be set back to zero.
+Extra time can be granted at any point: before the candidate starts (they then get
+`duration + extra` from the outset), while they are working, or after the timer closed the paper. It
+can be set back to zero.
+
+A row sitting at **In Progress for days** means the candidate started and never submitted. Their
+timer has almost certainly elapsed, but expiry is enforced on *candidate* requests, so the status
+only flips when their browser next calls the API. Their answers are saved; granting extra time is
+exactly how to let them finish.
 Nothing about the candidate's existing data is modified in any of these cases.
 
 ### Applied Role vs Test Role
