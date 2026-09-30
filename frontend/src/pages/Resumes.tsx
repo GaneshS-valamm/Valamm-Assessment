@@ -261,7 +261,6 @@ export default function Resumes() {
                             ? 'btn-secondary !px-3 !py-1.5 !text-xs'
                             : 'btn-primary !px-3 !py-1.5 !text-xs'
                         }
-                        disabled={r.is_locked}
                       />
                     </td>
                     <td className="td">

@@ -443,6 +443,10 @@ file must not lose the candidate. Instead:
   can attach the file again in one step. The broken version stays in history rather than being
   deleted.
 
+The admin's upload is never blocked — not by a submitted assessment, not by a locked resume — because
+restoring a lost file must be possible at any point. The candidate's own upload is still refused once
+they have sent their answers, so submitted work cannot be altered.
+
 > **Persistence warning.** `local` writes to the backend's own disk. That is fine for development
 > and for a machine with a persistent volume, but on an ephemeral host (Render free web services,
 > most container platforms, any redeploy that rebuilds the filesystem) **those files are lost while
@@ -517,7 +521,7 @@ All six acceptance workflows were executed against the running application:
 | 5 — Admin results | Pass. Objective auto-scored 15/20 (3 of 4 correct); selected vs. correct option shown per question; full subjective text shown; evaluations saved and re-read; final score stayed `Pending Evaluation` until all four were marked, then resolved to 78/100 = 78% |
 | 6 — Persistence | Pass. After stopping and restarting the backend, all assessments, links, answers, timestamps and evaluations were still present and correct |
 
-### Missing files (14/14 checks)
+### Missing files (19/19 checks)
 
 | Check | Result |
 | --- | --- |
@@ -528,6 +532,8 @@ All six acceptance workflows were executed against the running application:
 | Admin uploads a replacement from the table | Pass, becomes v2 and current |
 | Replacement previews correctly | Pass |
 | Broken version kept in history | Pass, nothing deleted |
+| Admin upload on a **submitted** assessment | Pass, accepted as v2; answers untouched |
+| Candidate upload after sending | Still refused with `409` |
 
 ### Extra time (41/41 checks, plus 18/18 for long-expired papers)
 

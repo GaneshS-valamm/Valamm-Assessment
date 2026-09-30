@@ -115,7 +115,12 @@ def upload_resume(
     The admin seeds the first version when creating the assessment; the candidate may
     then replace it with a corrected copy. Every version is kept.
     """
-    if assessment.status == AssessmentStatus.SUBMITTED:
+    by_admin = uploaded_by == UploadedByType.ADMIN
+
+    # The candidate may not touch their resume once they have sent their answers. The admin
+    # always may - they need to be able to attach a resume at any point, including restoring
+    # one whose file was lost after the assessment was submitted.
+    if assessment.status == AssessmentStatus.SUBMITTED and not by_admin:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Your answers have already been sent, so the resume on file can no longer be replaced.",
@@ -125,7 +130,7 @@ def upload_resume(
     display_name = safe_display_name(filename, fallback=f"resume.{ext}")
 
     previous = current_resume(db, assessment.id)
-    if previous is not None and previous.is_locked:
+    if previous is not None and previous.is_locked and not by_admin:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="This resume is locked and cannot be replaced.",

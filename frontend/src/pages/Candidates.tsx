@@ -290,7 +290,6 @@ export default function Candidates() {
                         busy={uploadingFor === r.id}
                         label={r.resume_confirmed_at ? 'Replace' : 'Attach'}
                         className="btn-secondary !px-3 !py-1.5 !text-xs"
-                        disabled={r.status === 'SUBMITTED'}
                       />
                     </td>
                     <td className="td">
