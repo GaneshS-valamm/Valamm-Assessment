@@ -5,6 +5,7 @@ import type { ResumeDetail, ResumePreview, ResumeRow, ResumeStatus, Role } from 
 import {
   Alert,
   InterestBadge,
+  UploadButton,
   Modal,
   ResumeStatusBadge,
   Spinner,
@@ -33,6 +34,8 @@ export default function Resumes() {
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const seenIds = useRef<Set<number>>(new Set());
   const [arrived, setArrived] = useState(0);
+  const [uploadingFor, setUploadingFor] = useState<number | null>(null);
+  const [notice, setNotice] = useState('');
 
   const search = params.get('search') ?? '';
   const roleId = params.get('role_id') ?? '';
@@ -99,6 +102,22 @@ export default function Resumes() {
     const id = setInterval(() => void load(true), POLL_MS);
     return () => clearInterval(id);
   }, [load]);
+
+  /** Attach a replacement resume straight from this table. */
+  async function uploadFor(row: ResumeRow, file: File) {
+    setUploadingFor(row.id);
+    setError('');
+    setNotice('');
+    try {
+      await adminApi.uploadResumeForAssessment(row.assessment_id, file);
+      setNotice(`Uploaded "${file.name}" for ${row.candidate_name}.`);
+      await load(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed.');
+    } finally {
+      setUploadingFor(null);
+    }
+  }
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -169,6 +188,13 @@ export default function Resumes() {
       </div>
 
       {error && <Alert kind="error">{error}</Alert>}
+      {notice && <Alert kind="success">{notice}</Alert>}
+      {rows.some((r) => !r.file_available) && (
+        <Alert kind="info">
+          Some resume files are no longer stored — their records are still here, so you know who to
+          chase. Use <strong>Upload</strong> on those rows to attach the file again.
+        </Alert>
+      )}
 
       <div className="card overflow-hidden">
         {loading ? (
@@ -187,6 +213,7 @@ export default function Resumes() {
                   <th className="th">Candidate Email</th>
                   <th className="th">Applied Role</th>
                   <th className="th">Resume File Name</th>
+                  <th className="th">Upload / Replace</th>
                   <th className="th">Uploaded By</th>
                   <th className="th">Candidate Interest</th>
                   <th className="th">Uploaded</th>
@@ -218,6 +245,24 @@ export default function Resumes() {
                         {r.version > 1 ? ` · v${r.version}` : ''}
                         {r.is_locked ? ' · locked' : ''}
                       </span>
+                      {!r.file_available && (
+                        <span className="mt-1 block text-xs font-semibold text-amber-700">
+                          file not stored
+                        </span>
+                      )}
+                    </td>
+                    <td className="td">
+                      <UploadButton
+                        onPick={(f) => uploadFor(r, f)}
+                        busy={uploadingFor === r.id}
+                        label={r.file_available ? 'Replace' : 'Upload'}
+                        className={
+                          r.file_available
+                            ? 'btn-secondary !px-3 !py-1.5 !text-xs'
+                            : 'btn-primary !px-3 !py-1.5 !text-xs'
+                        }
+                        disabled={r.is_locked}
+                      />
                     </td>
                     <td className="td">
                       <UploaderBadge by={r.uploaded_by_type} />
@@ -301,6 +346,8 @@ function ResumeDetailModal({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewError, setPreviewError] = useState('');
   const [textPreview, setTextPreview] = useState<ResumePreview | null>(null);
+  const [replacing, setReplacing] = useState(false);
+  const [replaceMsg, setReplaceMsg] = useState('');
 
   useEffect(() => {
     let alive = true;
@@ -322,6 +369,18 @@ function ResumeDetailModal({
     let url: string | null = null;
     let alive = true;
     setPreviewError('');
+
+    if (detail.file_available === false) {
+      setTextPreview({
+        resume_id: detail.id,
+        original_filename: detail.original_filename,
+        content_type: detail.content_type,
+        file_size: detail.file_size,
+        kind: 'missing',
+        text: null,
+      });
+      return;
+    }
 
     if (isPdf) {
       adminApi
@@ -360,6 +419,23 @@ function ResumeDetailModal({
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not open the resume.');
+    }
+  }
+
+  async function replaceFile(file: File) {
+    if (!detail) return;
+    setReplacing(true);
+    setError('');
+    try {
+      await adminApi.uploadResumeForAssessment(detail.assessment_id, file);
+      setReplaceMsg(`Uploaded "${file.name}".`);
+      onChanged();
+      setDetail(await adminApi.resume(detail.id));
+      setTextPreview(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Upload failed.');
+    } finally {
+      setReplacing(false);
     }
   }
 
@@ -500,7 +576,7 @@ function ResumeDetailModal({
             <div>
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-slate-900">Resume</p>
-                {isPdf && (
+                {isPdf && detail.file_available !== false && (
                   <button type="button" className="btn-ghost !px-2 !py-1 !text-xs" onClick={openInTab}>
                     Open in new tab ↗
                   </button>
@@ -524,6 +600,28 @@ function ResumeDetailModal({
                 ) : (
                   <Spinner label="Opening resume…" />
                 )
+              ) : textPreview?.kind === 'missing' ? (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-5">
+                  <p className="text-sm font-semibold text-amber-900">
+                    This file is no longer stored.
+                  </p>
+                  <p className="mt-2 text-sm text-amber-900">
+                    The record is intact — candidate, role and answers are all still here — but the
+                    file itself is gone, so there is nothing to display. Upload the resume again to
+                    restore it.
+                  </p>
+                  <div className="mt-4">
+                    <UploadButton
+                      onPick={replaceFile}
+                      busy={replacing}
+                      label="Upload resume"
+                      className="btn-primary"
+                    />
+                  </div>
+                  {replaceMsg && (
+                    <p className="mt-3 text-sm font-semibold text-emerald-700">{replaceMsg}</p>
+                  )}
+                </div>
               ) : textPreview === null ? (
                 <Spinner label="Opening resume…" />
               ) : textPreview.kind === 'text' && textPreview.text ? (
@@ -571,9 +669,11 @@ function ResumeDetailModal({
                   View Assessment
                 </Link>
               )}
-              <button className="btn-secondary" onClick={download} disabled={busy}>
-                ⭳ Download Resume
-              </button>
+              {detail.file_available !== false && (
+                <button className="btn-secondary" onClick={download} disabled={busy}>
+                  ⭳ Download Resume
+                </button>
+              )}
               <button
                 className="btn-secondary"
                 onClick={() => void setStatus('REVIEWED')}

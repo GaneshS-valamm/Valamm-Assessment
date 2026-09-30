@@ -275,6 +275,7 @@ class ResumeRowOut(BaseModel):
     uploaded_at: UtcDT
     reviewed_at: UtcDT | None
     uploaded_by_type: UploadedByType
+    file_available: bool = True
     assessment_status: AssessmentStatus
     assessment_submitted_at: UtcDT | None
     candidate_confirmed_at: UtcDT | None
@@ -472,5 +473,5 @@ class ResumePreviewOut(BaseModel):
     original_filename: str
     content_type: str
     file_size: int
-    kind: str  # "pdf" | "text" | "unsupported"
+    kind: str  # "pdf" | "text" | "unsupported" | "missing"
     text: str | None = None

@@ -430,6 +430,19 @@ To move to Supabase Storage, S3 or another private object store later: implement
 register it in `get_storage()`, and set `RESUME_STORAGE_BACKEND`. Nothing in the candidate or admin
 workflow changes — the database only ever holds the `storage_key`.
 
+### When a stored file goes missing
+
+If a file is no longer in the storage backend, the record is never hidden or deleted — losing the
+file must not lose the candidate. Instead:
+
+* every row carries `file_available`, computed from the storage backend, and the Resumes table shows
+  a **file not stored** flag with a banner explaining what to do;
+* the preview endpoint returns `200` with `kind: "missing"` rather than an error, so the panel shows
+  a short explanation instead of a red alert and the browser console stays clean;
+* every row has an **Upload / Replace** action, and the detail panel offers the same, so the admin
+  can attach the file again in one step. The broken version stays in history rather than being
+  deleted.
+
 > **Persistence warning.** `local` writes to the backend's own disk. That is fine for development
 > and for a machine with a persistent volume, but on an ephemeral host (Render free web services,
 > most container platforms, any redeploy that rebuilds the filesystem) **those files are lost while
@@ -503,6 +516,18 @@ All six acceptance workflows were executed against the running application:
 | 4 — Autosave and submission | Pass. 8/8 answers persisted, restored byte-for-byte after re-fetch (newlines and code indentation intact); submit → `SUBMITTED`; second submit → 409; post-submit edit → 409; reopening the link shows the submitted state |
 | 5 — Admin results | Pass. Objective auto-scored 15/20 (3 of 4 correct); selected vs. correct option shown per question; full subjective text shown; evaluations saved and re-read; final score stayed `Pending Evaluation` until all four were marked, then resolved to 78/100 = 78% |
 | 6 — Persistence | Pass. After stopping and restarting the backend, all assessments, links, answers, timestamps and evaluations were still present and correct |
+
+### Missing files (14/14 checks)
+
+| Check | Result |
+| --- | --- |
+| Healthy resume reports `file_available` true and previews | Pass |
+| File deleted from storage, row left behind | Pass, candidate still listed with metadata intact |
+| Row flags the file unavailable | Pass |
+| Preview returns `200 kind=missing`, not an error | Pass, no console error |
+| Admin uploads a replacement from the table | Pass, becomes v2 and current |
+| Replacement previews correctly | Pass |
+| Broken version kept in history | Pass, nothing deleted |
 
 ### Extra time (41/41 checks, plus 18/18 for long-expired papers)
 

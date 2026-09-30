@@ -206,6 +206,9 @@ def to_row(resume: CandidateResume) -> dict:
         "uploaded_at": resume.uploaded_at,
         "reviewed_at": resume.reviewed_at,
         "uploaded_by_type": resume.uploaded_by_type,
+        # Whether the bytes are still in the storage backend. False means the row survived
+        # but the file did not - the admin needs to upload a replacement.
+        "file_available": get_storage().exists(resume.storage_key),
         "assessment_status": assessment.status,
         "assessment_submitted_at": assessment.submitted_at,
         "candidate_confirmed_at": assessment.resume_confirmed_at,

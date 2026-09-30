@@ -270,6 +270,7 @@ export interface ResumeRow {
   uploaded_at: string;
   reviewed_at: string | null;
   uploaded_by_type: UploadedByType;
+  file_available: boolean;
   assessment_status: AssessmentStatus;
   assessment_submitted_at: string | null;
   candidate_confirmed_at: string | null;
@@ -301,6 +302,6 @@ export interface ResumePreview {
   original_filename: string;
   content_type: string;
   file_size: number;
-  kind: 'pdf' | 'text' | 'unsupported';
+  kind: 'pdf' | 'text' | 'unsupported' | 'missing';
   text: string | null;
 }

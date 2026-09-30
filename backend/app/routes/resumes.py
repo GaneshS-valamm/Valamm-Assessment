@@ -187,7 +187,21 @@ async def admin_upload_resume(
 
 
 def _preview_payload(resume) -> dict:
-    """Build an inline-viewable payload: PDFs stream as-is, DOCX becomes text."""
+    """Build an inline-viewable payload: PDFs stream as-is, DOCX becomes text.
+
+    A file whose bytes are no longer in the storage backend is reported as kind
+    "missing" rather than raising, so the panel can offer to replace it instead of
+    showing the reviewer an error.
+    """
+    base = {
+        "resume_id": resume.id,
+        "original_filename": resume.original_filename,
+        "content_type": resume.content_type,
+        "file_size": resume.file_size,
+    }
+    if not get_storage().exists(resume.storage_key):
+        return {**base, "kind": "missing", "text": None}
+
     if resume.content_type == "application/pdf":
         return {
             "resume_id": resume.id,
