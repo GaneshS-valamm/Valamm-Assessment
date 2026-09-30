@@ -13,13 +13,14 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
-    # Resumes are written to disk. Without a persistent disk they are lost on every
-    # deploy and restart (the API then returns 410 for those downloads). A paid plan
-    # is required for disks - see README section 9 for the object-storage alternative.
-    # disk:
-    #   name: resume-storage
-    #   mountPath: /opt/render/project/src/backend/storage
-    #   sizeGB: 1
+    # Resume files live on this persistent disk. Without it they sit on the container
+    # filesystem, which Render wipes on every deploy and restart - downloads then return
+    # 410. RESUME_STORAGE_DIR below must point inside the mount path, or files are written
+    # to the ephemeral location again and lost.
+    disk:
+      name: resume-storage
+      mountPath: /app/storage
+      sizeGB: 15
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.6"
@@ -49,8 +50,12 @@ services:
         value: Asia/Kolkata
       - key: RESUME_STORAGE_BACKEND
         value: local
+      # The disk's mount path. Storage keys are already prefixed "resumes/", so files land
+      # at /app/storage/resumes/YYYY/MM/... - pointing this at /app/storage/resumes instead
+      # would work but nest a second "resumes" folder. Must be absolute and inside the
+      # mount path; a relative value resolves against the ephemeral backend directory.
       - key: RESUME_STORAGE_DIR
-        value: storage/resumes
+        value: /app/storage
       - key: MAX_RESUME_SIZE_MB
         value: "10"
       - key: RESUME_REQUIRED_BEFORE_START
